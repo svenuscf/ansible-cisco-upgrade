@@ -1,0 +1,7 @@
+[all:vars]
+ansible_user=admin
+ansible_password=C1sc0123
+host_key_checking=False
+
+[ios_xe]
+Sw1 

@@ -1,0 +1,20 @@
+# Ansible Playbook to reboot Cisco IOS XE Switches
+#
+---
+- name: Reboot Cisco IOS XE Switches
+  hosts: all
+  connection: network_cli
+  gather_facts: no
+  vars_files:
+    - group_vars/all.yaml
+
+  tasks:
+    - name: Issue reload command
+      cli_command:
+        command: reload
+        prompt: 
+          - confirm
+        answer:
+          - y
+      register: reload_output
+

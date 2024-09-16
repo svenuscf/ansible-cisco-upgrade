@@ -1,0 +1,18 @@
+---
+# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+# Show running version
+#
+- name: Display running version on Cisco IOS XE switches 
+  hosts: all
+  connection: network_cli
+  gather_facts: yes
+  vars_files:
+    - group_vars/all.yaml
+
+  tasks:
+    - name: Display running version
+      ios_facts:
+    - debug:
+        msg:
+        - "Current version is {{ ansible_net_version }}"
+

@@ -1,0 +1,100 @@
+---
+# Ansible Playbook to start install the new image on Cisco switches running IOS XE
+# This playbook checks if the switch is in install mode, and will quit if not.
+# Then start the upgrade process
+# This playbook works for upgrade from 16.X to 17.X , from INSTALL mode to INSTALL mode
+#
+- name: Activate Cisco IOS XE Switches upgrade via install
+  hosts: all
+  connection: network_cli
+  gather_facts: yes
+  vars_files:
+    - group_vars/all.yaml
+
+  tasks:
+    - name: Check Current Version
+      ios_facts:
+    - debug:
+        msg:
+        - "Current version is {{ ansible_net_version }}"
+
+    - debug:
+        msg:
+        - "Image is compliant. Upgrade will not be performed."
+      when: ansible_net_version == upgrade_ios_version
+
+    - debug:
+        msg:
+        - "Image is not compliant and will be upgraded."
+      when: ansible_net_version != upgrade_ios_version
+
+    - name: Run "show version" to check if the switch is in INSTALL mode
+      cisco.ios.ios_command:
+        commands:
+          - show version
+      register: version_output
+
+    - name: Parse "show version" output for INSTALL mode
+      set_fact:
+        in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
+
+    - name: Display whether the switch is in INSTALL mode
+      debug:
+        msg: "The switch is in INSTALL mode: {{ in_install_mode }}"
+
+    - name: Fail if the switch is not in INSTALL mode
+      fail:
+        msg: "The switch is not in INSTALL mode. Install upgrade cannot proceed."
+      when: in_install_mode == False
+
+        #    - name: Activate the new image on the switch
+        #      cisco.ios.ios_command:
+        #commands:
+        #  - command: 'install add file {{ switch_file }} activate commit' 
+        #    prompt:
+        #      - 'This operation may require a reload of the system. Do you want to proceed\? \[y/n\]'
+        #    answer:
+        #      - 'y'
+        #register: install_output
+        #when: in_install_mode == True
+        #vars:
+        #ansible_command_timeout: 6000
+
+    - name: Run the install command on the switch and handle the prompt
+      cli_command:
+        command: 'install add file {{ switch_file }} activate commit'
+        prompt:
+          - proceed
+        answer:
+          - y
+      register: install_output
+      ignore_errors: yes
+      when: 
+        - in_install_mode == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Display the install command output
+      debug:
+        var: install_output.stdout
+      when: 
+        - in_install_mode == True
+        - ansible_net_version != upgrade_ios_version
+
+
+#    - name: Wait for switch to reboot and become reachable
+#      wait_for_connection:
+#        delay: 1800
+#        sleep: 60
+#        timeout: 900
+#      when: in_install_mode == True
+#
+#    - name: Gather new facts
+#      cisco.ios.ios_facts:
+#        gather_subset: hardware
+#      register: facts_output_new
+#
+#    - name: Check new version
+#      debug:
+#        msg: "Running new version {{ facts_output_new['ansible_facts']['ansible_net_version'] }}. Upgrade completed"
+#      when: upgrade_ios_version == facts_output_new['ansible_facts']['ansible_net_version']
+
