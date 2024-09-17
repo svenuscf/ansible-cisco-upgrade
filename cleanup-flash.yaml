@@ -4,18 +4,18 @@
 # This play book cleans up unused firmware package files on the flash
 #
 - name: Cleanup unused firmware package files on Cisco IOS XE Switches
-    hosts: all
-    connection: network_cli
-    gather_facts: yes
-    vars_files:
-      - group_vars/all.yaml
+  hosts: all
+  connection: network_cli
+  gather_facts: yes
+  vars_files:
+    - group_vars/all.yaml
 
   tasks:
   - name: Cleanup using install remove inactive commands
-      cli_command:
-        command: install remove inactive
+    cli_command:
+      command: install remove inactive
         prompt:
           - remove the above files
         answer:
           - y
-      register: cleanup_output
+    register: cleanup_output
