@@ -66,3 +66,14 @@ In the above section, ensure the hosts variable are correctly identified through
    ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml
 ```
    (omit --ask-vault-pass if ansible-vault is not in used)
+
+
+5. Download required firmware file and upload to the Ansible host (assuming SCP will be used to transfer file from host to devices), 
+and put it under the **images/** sub-directory.
+
+6. Deploy the upgrade by running the sequence of playbooks listed above.
+
+
+## Contributor
+
+The playbooks are developed by Gary Wong (ajidom@gmail.com).
