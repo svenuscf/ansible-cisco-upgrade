@@ -7,9 +7,25 @@ Assume switches are running in INSTALL mode and will also be upgraded using INST
 
 If BUNDLE mode is involed, further development on new playbook is required. 
 
+## File Structure
+Main
+├── Catalyst_Install_Mode
+│   ├── activate-image.yaml
+│   ├── cleanup-flash.yaml
+│   ├── file-validity-check.yaml
+│   └── upload-image-scp.yaml
+├── README.md
+├── ansible.cfg
+├── ansible_hosts
+├── group_vars
+│   └── catalyst_vars.yaml
+├── reboot.yaml
+└── show-version.yaml
+
+
 ## Usage
 
-**all.yaml** should be put into **group_vars/** sub-directory. If needed, use ```ansible-vault``` to encrypt.
+Group variables are stored in the **group_vars/** sub-directory. Use ```ansible-vault``` to encrypt when necessary.
 
 All IOS XE images should be placed at the **images/** sub-directory. 
 
@@ -24,7 +40,7 @@ These playbooks should be executed in the sequence listed above.
 
 ## Preparing the playbooks for execution
 
-1. Modifying **all.yaml**. Put it in **group_var**s sub-directory:
+1. Modifying **catalyst_vars.yaml** file, under **group_var**s sub-directory:
 
 Before executing the playbooks, make sure to change the variables in **all.yaml** according to the needs.
 It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
@@ -56,7 +72,7 @@ Below list explains each variable:
   connection: network_cli
   gather_facts: yes
   vars_files:
-    - group_vars/all.yaml 
+    - ../group_vars/all.yaml 
 ```
 In the above section, ensure the hosts variable are correctly identified through ansible_hosts. 
 
@@ -65,7 +81,10 @@ In the above section, ensure the hosts variable are correctly identified through
 ```
    ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml
 ```
-   (omit --ask-vault-pass if ansible-vault is not in used)
+   (omit --ask-vault-pass if ansible-vault is not in used)  OR to run the real playbooks:
+```
+   ansible-playbook -i ansible_hosts Catalyst_Install_Mode/cleanup-flash.yaml
+```
 
 
 5. Download required firmware file and upload to the Ansible host (assuming SCP will be used to transfer file from host to devices), 
