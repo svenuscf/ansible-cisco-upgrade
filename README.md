@@ -8,7 +8,7 @@ Assume switches are running in INSTALL mode and will also be upgraded using INST
 If BUNDLE mode is involed, further development on new playbook is required. 
 
 ## Usage.
-=================================================================================================
+
 all.yaml should be put into group_vars/ sub-directory. If needed, use ansible-vault to encrypt.
 
 All IOS XE images should be placed at the images/ sub-directory. 
@@ -19,12 +19,10 @@ Playbooks breaks down into 4 phases with 4 individual playbooks:
 3. file-validity-check.yaml - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
 4. activate-image.yaml      - Perform the upgrade using the install command.
 
-Playbooks should be run in sequence as listed above. 
-=================================================================================================
-
+These playbooks should be executed in the sequence listed above.
 
 ## Preparing the playbooks for execution.
-=================================================================================================
+
 1. Modifying all.yaml. Put it in group_vars sub-directory:
 
 Before executing the playbooks, make sure to change the variables in all.yaml according to the needs.
@@ -62,37 +60,4 @@ In the above section, ensure the hosts variable are correctly identified through
 4. Test playbooks by using show-version.yaml. Commands as below: (Note that ansible-vault will prompt for vault password if any of the variable files or playbooks are ansible-vault encrypted.)
 
    ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml  (omit --ask-vault-pass if ansible-vault is not in used)
-
-A successful run output is shown below:
-=====================================================================================================================================
-PLAY [Display running version on Cisco IOS XE switches] *****************************************************************************
-
-TASK [Gathering Facts] **************************************************************************************************************
-[WARNING]: Ignoring timeout(10) for ansible.legacy.ios_facts
-[WARNING]: Ignoring timeout(10) for ansible.legacy.ios_facts
-ok: [r1]
-ok: [sw1]
-
-TASK [Display running version] ******************************************************************************************************
-ok: [r1]
-ok: [sw1]
-
-TASK [debug] ************************************************************************************************************************
-ok: [sw1] => {
-    "msg": [
-        "Current version is 16.12.11"
-    ]
-}
-ok: [r1] => {
-    "msg": [
-        "Current version is 16.09.06"
-    ]
-}
-
-PLAY RECAP **************************************************************************************************************************
-r1                         : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-sw1                        : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-
-
-=====================================================================================================================================
 
