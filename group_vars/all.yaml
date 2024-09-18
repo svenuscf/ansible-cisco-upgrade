@@ -1,0 +1,15 @@
+---
+cli:
+  host: "{{ inventory_hostname }}"
+  username: admin
+  password: cisco123
+ansible_network_os: ios
+ansible_command_timeout: 6000
+upgrade_ios_version: 16.06.09
+upgrade_file: "cat3k_caa-universalk9.16.06.09.SPA.bin"
+upgrade_path: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
+switch_file: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
+ftp_file: "~/ansible/images/cat3k_caa-universalk9.16.06.09.SPA.bin"
+ftp_ip: 192.168.20.100
+ftp_username: ftp_user
+ftp_password: ftp_Password!23
