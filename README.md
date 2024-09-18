@@ -1,12 +1,13 @@
 # Ansible Playbooks to upgrade Cisco IOS XE Switches
 
+## Introduction
 These playbooks are used to upgrade Cisco IOS XE Switches.
 
 Assume switches are running in INSTALL mode and will also be upgraded using INSTALL mode.
 
 If BUNDLE mode is involed, further development on new playbook is required. 
 
-Usage.
+## Usage.
 =================================================================================================
 all.yaml should be put into group_vars/ sub-directory. If needed, use ansible-vault to encrypt.
 
@@ -22,7 +23,7 @@ Playbooks should be run in sequence as listed above.
 =================================================================================================
 
 
-Preparing the playbooks for execution.
+## Preparing the playbooks for execution.
 =================================================================================================
 1. Modifying all.yaml. Put it in group_vars sub-directory:
 
