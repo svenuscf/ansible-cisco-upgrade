@@ -14,8 +14,8 @@
   - name: Cleanup using install remove inactive commands
     cli_command:
       command: install remove inactive
-        prompt:
-          - remove the above files
-        answer:
-          - y
+      prompt:
+        - remove the above files
+      answer:
+        - y
     register: cleanup_output
