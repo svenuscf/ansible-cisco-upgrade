@@ -1,13 +1,13 @@
 ---
-# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+# Ansible Playbook to uploade images to Cisco Devices running IOS XE
 # Show running version
 #
-- name: Display running version on Cisco IOS XE switches 
+- name: Display running version on Cisco IOS Devices 
   hosts: all
   connection: network_cli
   gather_facts: yes
   vars_files:
-    - group_vars/all.yaml
+    - group_vars/catalyst_vars.yaml
 
   tasks:
     - name: Display running version
