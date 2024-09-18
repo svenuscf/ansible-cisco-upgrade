@@ -1,12 +1,12 @@
-# Ansible Playbook to reboot Cisco IOS XE Switches
+# Ansible Playbook to reboot Cisco IOS XE Devices
 #
 ---
-- name: Reboot Cisco IOS XE Switches
+- name: Reboot Cisco IOS XE Devices
   hosts: all
   connection: network_cli
   gather_facts: no
   vars_files:
-    - group_vars/all.yaml
+    - group_vars/catalyst_vars.yaml
 
   tasks:
     - name: Issue reload command
