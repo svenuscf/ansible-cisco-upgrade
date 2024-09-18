@@ -60,8 +60,9 @@ Below list explains each variable:
 ```
 In the above section, ensure the hosts variable are correctly identified through ansible_hosts. 
 
-4. Test playbooks by using show-version.yaml. Commands as below: (Note that ansible-vault will prompt for vault password if any of the variable files or playbooks are ansible-vault encrypted.)
+4. Test playbooks by using ```show-version.yaml```. Commands as below: (Note that ansible-vault will prompt for vault password if any of the variable files or playbooks are ansible-vault encrypted.)
 
 ```
-   ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml  (omit --ask-vault-pass if ansible-vault is not in used)
+   ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml
 ```
+   (omit --ask-vault-pass if ansible-vault is not in used)
