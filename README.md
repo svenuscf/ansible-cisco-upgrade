@@ -8,6 +8,7 @@ Assume switches are running in INSTALL mode and will also be upgraded using INST
 If BUNDLE mode is involed, further development on new playbook is required. 
 
 ## File Structure
+```
 Main
 ├── Catalyst_Install_Mode
 │   ├── activate-image.yaml
@@ -21,6 +22,7 @@ Main
 │   └── catalyst_vars.yaml
 ├── reboot.yaml
 └── show-version.yaml
+```
 
 
 ## Usage
