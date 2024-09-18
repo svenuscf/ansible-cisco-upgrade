@@ -31,18 +31,18 @@ Alternatively, run the "show-version.yaml" playbook which displays the running v
 
 Below list explains each variable:
 
-username                - username used to login from Ansible host to the device
-password                - password used to login from Ansible host to the device. Recommended to use ansible-vault to encrypt this file.
-ansible_network_os      - instruct Ansible to detect network device platform. Use "ios" for Cisco IOS or IOS-XE devices.
-ansible_command_timeout - Ansible default command timeout value. In a typical situation, 30 seconds is enough. However, larger value is required for longer operation like uploading file from the host. 
-upgrade_ios_version     - This is the version to be upgraded. Note that this should match the returned value from within the Ansible gather facts API. An Example is "16.12.11".
-upgrade_file            - This is the firmware name to be used to upgrade. Directly replace this field with the image name downloaded from Cisco. Example: "cat3k_caa-universalk9.16.06.09.SPA.bin"
-upgrade_path            - This is the path for the Ansible host to locate image file locally. Pay attention to the playbook running directory path. Consider using an absolute path. Example: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-switch_file             - Specifies the location and the filename of the image to be uploaded on the switch. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
-ftp_file                - In some tests, SCP performs worse than FTP in uploading file. In case of using FTP, this variable specifies the image file location of the FTP server. Example: "~/ansible/images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-ftp_ip                  - Specifies the FTP server ip address when FTP is used.
-ftp_username            - FTP user used to copy file.
-ftp_password            - FTP password used. 
+- **username**                : username used to login from Ansible host to the device
+- **password**                : password used to login from Ansible host to the device. Recommended to use ansible-vault to encrypt this file.
+- **ansible_network_os**      : instruct Ansible to detect network device platform. Use "ios" for Cisco IOS or IOS-XE devices.
+- **ansible_command_timeout** : Ansible default command timeout value. In a typical situation, 30 seconds is enough. However, larger value is required for longer operation like uploading file from the host. 
+- **upgrade_ios_version**     : This is the version to be upgraded. Note that this should match the returned value from within the Ansible gather facts API. An Example is "16.12.11".
+- **upgrade_file**            : This is the firmware name to be used to upgrade. Directly replace this field with the image name downloaded from Cisco. Example: "cat3k_caa-universalk9.16.06.09.SPA.bin"
+- **upgrade_path**            : This is the path for the Ansible host to locate image file locally. Pay attention to the playbook running directory path. Consider using an absolute path. Example: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
+- **switch_file**             : Specifies the location and the filename of the image to be uploaded on the switch. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
+- **ftp_file**                : In some tests, SCP performs worse than FTP in uploading file. In case of using FTP, this variable specifies the image file location of the FTP server. Example: "~/ansible/images/cat3k_caa-universalk9.16.06.09.SPA.bin"
+- **ftp_ip**                  : Specifies the FTP server ip address when FTP is used.
+- **ftp_username**            : FTP user used to copy file.
+- **ftp_password**            : FTP password used. 
 
 2. Modify ansible_hosts. 
 
