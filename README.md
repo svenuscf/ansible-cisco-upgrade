@@ -13,10 +13,10 @@ all.yaml should be put into group_vars/ sub-directory. If needed, use ansible-va
 All IOS XE images should be placed at the images/ sub-directory. 
 
 Playbooks breaks down into 4 phases with 4 individual playbooks:
-1. cleanup-flash.yaml - Clean up any unused firmware files to make space on the switche flash.  
-2. upload-image-scp.yaml - Upload image file, if not already exist on the switch. This playbook uses SCP to copy file.
+1. cleanup-flash.yaml       - Clean up any unused firmware files to make space on the switche flash.  
+2. upload-image-scp.yaml    - Upload image file, if not already exist on the switch. This playbook uses SCP to copy file.
 3. file-validity-check.yaml - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
-4. activate-image.yaml - Perform the upgrade using the install command.
+4. activate-image.yaml      - Perform the upgrade using the install command.
 
 Playbooks should be run in sequence as listed above. 
 =================================================================================================
@@ -32,18 +32,18 @@ Alternatively, run the "show-version.yaml" playbook which displays the running v
 
 Below list explains each variable:
 
-username - username used to login from Ansible host to the device
-password - password used to login from Ansible host to the device. Recommended to use ansible-vault to encrypt this file.
-ansible_network_os - instruct Ansible to detect network device platform. Use "ios" for Cisco IOS or IOS-XE devices.
+username                - username used to login from Ansible host to the device
+password                - password used to login from Ansible host to the device. Recommended to use ansible-vault to encrypt this file.
+ansible_network_os      - instruct Ansible to detect network device platform. Use "ios" for Cisco IOS or IOS-XE devices.
 ansible_command_timeout - Ansible default command timeout value. In a typical situation, 30 seconds is enough. However, larger value is required for longer operation like uploading file from the host. 
-upgrade_ios_version - This is the version to be upgraded. Note that this should match the returned value from within the Ansible gather facts API. An Example is "16.12.11".
-upgrade_file - This is the firmware name to be used to upgrade. Directly replace this field with the image name downloaded from Cisco. Example: "cat3k_caa-universalk9.16.06.09.SPA.bin"
-upgrade_path - This is the path for the Ansible host to locate image file locally. Pay attention to the playbook running directory path. Consider using an absolute path. Example: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-switch_file - Specifies the location and the filename of the image to be uploaded on the switch. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
-ftp_file - In some tests, SCP performs worse than FTP in uploading file. In case of using FTP, this variable specifies the image file location of the FTP server. Example: "~/ansible/images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-ftp_ip - Specifies the FTP server ip address when FTP is used.
-ftp_username - FTP user used to copy file.
-ftp_password - FTP password used. 
+upgrade_ios_version     - This is the version to be upgraded. Note that this should match the returned value from within the Ansible gather facts API. An Example is "16.12.11".
+upgrade_file            - This is the firmware name to be used to upgrade. Directly replace this field with the image name downloaded from Cisco. Example: "cat3k_caa-universalk9.16.06.09.SPA.bin"
+upgrade_path            - This is the path for the Ansible host to locate image file locally. Pay attention to the playbook running directory path. Consider using an absolute path. Example: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
+switch_file             - Specifies the location and the filename of the image to be uploaded on the switch. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
+ftp_file                - In some tests, SCP performs worse than FTP in uploading file. In case of using FTP, this variable specifies the image file location of the FTP server. Example: "~/ansible/images/cat3k_caa-universalk9.16.06.09.SPA.bin"
+ftp_ip                  - Specifies the FTP server ip address when FTP is used.
+ftp_username            - FTP user used to copy file.
+ftp_password            - FTP password used. 
 
 2. Modify ansible_hosts. 
 
