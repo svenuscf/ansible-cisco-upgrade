@@ -14,10 +14,10 @@ all.yaml should be put into group_vars/ sub-directory. If needed, use ansible-va
 All IOS XE images should be placed at the images/ sub-directory. 
 
 Playbooks breaks down into 4 phases with 4 individual playbooks:
-1. cleanup-flash.yaml       - Clean up any unused firmware files to make space on the switche flash.  
-2. upload-image-scp.yaml    - Upload image file, if not already exist on the switch. This playbook uses SCP to copy file.
-3. file-validity-check.yaml - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
-4. activate-image.yaml      - Perform the upgrade using the install command.
+1. **cleanup-flash.yaml**       - Clean up any unused firmware files to make space on the switche flash.  
+2. **upload-image-scp.yaml**    - Upload image file, if not already exist on the switch. This playbook uses SCP to copy file.
+3. **file-validity-check.yaml** - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
+4. **activate-image.yaml**      - Perform the upgrade using the install command.
 
 These playbooks should be executed in the sequence listed above.
 
@@ -59,5 +59,6 @@ In the above section, ensure the hosts variable are correctly identified through
 
 4. Test playbooks by using show-version.yaml. Commands as below: (Note that ansible-vault will prompt for vault password if any of the variable files or playbooks are ansible-vault encrypted.)
 
+```
    ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml  (omit --ask-vault-pass if ansible-vault is not in used)
 
