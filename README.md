@@ -9,9 +9,9 @@ If BUNDLE mode is involed, further development on new playbook is required.
 
 ## Usage
 
-all.yaml should be put into group_vars/ sub-directory. If needed, use ansible-vault to encrypt.
+**all.yaml** should be put into **group_vars/** sub-directory. If needed, use ```ansible-vault``` to encrypt.
 
-All IOS XE images should be placed at the images/ sub-directory. 
+All IOS XE images should be placed at the **images/** sub-directory. 
 
 Playbooks breaks down into 4 phases with 4 individual playbooks:
 1. **cleanup-flash.yaml**       - Clean up any unused firmware files to make space on the switche flash.  
@@ -24,11 +24,11 @@ These playbooks should be executed in the sequence listed above.
 
 ## Preparing the playbooks for execution
 
-1. Modifying all.yaml. Put it in group_vars sub-directory:
+1. Modifying **all.yaml**. Put it in **group_var**s sub-directory:
 
-Before executing the playbooks, make sure to change the variables in all.yaml according to the needs.
+Before executing the playbooks, make sure to change the variables in **all.yaml** according to the needs.
 It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
-Alternatively, run the "show-version.yaml" playbook which displays the running version of devices as well as proving SSH connection from Ansible host is successful.
+Alternatively, run the ```show-version.yaml``` playbook which displays the running version of devices as well as proving SSH connection from Ansible host is successful.
 
 Below list explains each variable:
 
