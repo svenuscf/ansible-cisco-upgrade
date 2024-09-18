@@ -1,0 +1,98 @@
+---
+# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+# Check available space and quit if failed
+# Playbook will also check if the file already exists on the switch before uploading
+#
+# Upload will utilize SCP and the playbook will mandatorily turn on SCP on the switch (without saving)
+# Once the file is on the switch (either by upload or already on the switch), MD5 checksum will be checked to see validity of the image file.
+# An error message will be prompted if the file is corrupted.
+#
+- name: Check images to Cisco IOS XE Switches
+  hosts: all
+  connection: network_cli
+  gather_facts: yes
+  vars_files:
+    - ../group_vars/ios_xe_router_vars.yaml
+
+  tasks:
+# Check if the new image file already exists on the switch
+
+    - name: Check if the file exists on the switch
+      cisco.ios.ios_command:
+        commands: "dir {{ switch_file }}"
+      register: file_check
+      ignore_errors: yes
+
+    - name: Parse the file check result
+      set_fact:
+        file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
+
+
+# Check the file validity by comparing md5 checksums
+    - name: Run md5sum to calculate checksum
+      command: "md5sum {{ upgrade_path }}"
+      register: md5_output
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Extract the MD5 checksum from md5sum output
+      set_fact:
+        file_md5sum: "{{ md5_output.stdout.split()[0] }}"
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Display the calculated MD5 checksum
+      debug:
+        msg: "Calculated MD5 checksum: {{ file_md5sum }}"
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Get the checksum of the file on the switch
+      cisco.ios.ios_command:
+        commands:
+          - verify /md5 {{ switch_file }}
+      register: checksum_output
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Flatten the stdout lines to handle multi-line output
+      set_fact:
+        flat_output: "{{ checksum_output.stdout_lines | flatten }}"
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Extract the checksum from the output
+      set_fact:
+        file_checksum: "{{ flat_output | select ('search', 'verify /md5') | first | regex_search('=\\s*(\\w+)', '\\1') }}" 
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Convert the checksum from list to string (if necessary)
+      set_fact:
+        file_checksum: "{{ file_checksum[0] if file_checksum is iterable else file_checksum }}"
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Display checksum on the switch
+      debug:
+        msg: "Checksum on switch: {{ file_checksum }}"
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version
+
+    - name: Compare the checksum with the calculated value from the source file
+      assert:
+        that:
+          - file_md5sum == file_checksum 
+        fail_msg: "File checksum does not match! The file may be corrupted. Please delete the file and re-run the playbook."
+        success_msg: "File checksum matches! The file is valid. Please proceed to the next playbook to perform install upgrade."
+      when:
+        - file_exists == True
+        - ansible_net_version != upgrade_ios_version

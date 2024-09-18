@@ -1,0 +1,21 @@
+---
+# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+#
+# This play book cleans up unused firmware package files on the flash
+#
+- name: Cleanup unused firmware package files on Cisco IOS XE Switches
+  hosts: all
+  connection: network_cli
+  gather_facts: yes
+  vars_files:
+    - ../group_vars/ios_xe_router_vars.yaml
+
+  tasks:
+  - name: Cleanup using install remove inactive commands
+    cli_command:
+      command: install remove inactive
+      prompt:
+        - remove the above files
+      answer:
+        - y
+    register: cleanup_output

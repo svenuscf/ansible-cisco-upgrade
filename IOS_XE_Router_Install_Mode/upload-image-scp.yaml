@@ -1,0 +1,95 @@
+---
+# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+# Check available space and quit if failed
+# Playbook will also check if the file already exists on the switch before uploading
+#
+# Upload will utilize SCP and the playbook will mandatorily turn on SCP on the switch (without saving)
+# Once the file is on the switch (either by upload or already on the switch), MD5 checksum will be checked to see validity of the image file.
+# An error message will be prompted if the file is corrupted.
+#
+- name: Upload images to Cisco IOS XE Switches
+  hosts: all
+  connection: network_cli
+  gather_facts: yes
+  vars_files:
+    - ../group_vars/ios_xe_router_vars.yaml
+
+  tasks:
+    - name: Check Current Version
+      ios_facts:
+    - debug:
+        msg:
+        - "Current version is {{ ansible_net_version }}"
+
+    - debug:
+        msg:
+        - "Image is compliant. Upgrade will not be performed."
+      when: ansible_net_version == upgrade_ios_version
+
+    - debug:
+        msg:
+        - "Image is not compliant and will be upgraded."
+      when: ansible_net_version != upgrade_ios_version
+
+    - name: Get the upgrade file size
+      stat: 
+        path: "{{ upgrade_path }}"
+      register: file_info
+
+    - name: Convert file size to KB
+      set_fact:
+        file_size_kb: "{{ file_info.stat.size / 1024 | round(2) }}"
+
+    - name: Display new image file size in KB
+      debug:
+        msg: "New image file is {{ file_size_kb }} Kilo Bytes"
+
+    - name: Display filesystem information
+      debug:
+        var: ansible_net_filesystems_info
+
+    - name: Set free space variable for flash
+      set_fact:
+        free_space: "{{ ansible_net_filesystems_info['flash:']['spacefree_kb'] }}"
+
+    - name: Check if the switch has enough space for the new image file
+      assert:
+        that:
+          - (file_size_kb | int) < (free_space | int)
+        fail_msg: "Not enough space on the device! Please clean up before continue."
+        success_msg: "Free space is available. Continue to upload image."
+
+# Check if the new image file already exists on the switch
+
+    - name: Check if the file exists on the switch
+      cisco.ios.ios_command:
+        commands: "dir {{ switch_file }}"
+      register: file_check
+      ignore_errors: yes
+
+    - name: Parse the file check result
+      set_fact:
+        file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
+
+# Enable SCP server on the switch if new image does not exist and prepare to upload 
+    - name: Enable SCP server on the Cisco switch
+      cisco.ios.ios_config:
+        lines:
+          - ip scp server enable
+      when: 
+        - file_exists == False
+        - ansible_net_version != upgrade_ios_version
+
+# Use SCP to upload image file
+# Set file transfer timeout to 40 minutes
+#
+    - name: Upload file via SCP to the switch
+      net_put:
+        src: "{{ upgrade_path }}"
+        dest: "{{ switch_file }}"
+      vars:
+        ansible_command_timeout: 6000
+      when: 
+        - file_exists == False
+        - ansible_net_version != upgrade_ios_version
+

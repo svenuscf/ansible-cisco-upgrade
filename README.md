@@ -9,8 +9,12 @@ If BUNDLE mode is involed, further development on new playbook is required.
 
 ## File Structure
 ```
-Main
 ├── Catalyst_Install_Mode
+│   ├── activate-image.yaml
+│   ├── cleanup-flash.yaml
+│   ├── file-validity-check.yaml
+│   └── upload-image-scp.yaml
+├── IOS_XE_Router_Install_Mode
 │   ├── activate-image.yaml
 │   ├── cleanup-flash.yaml
 │   ├── file-validity-check.yaml
@@ -19,7 +23,8 @@ Main
 ├── ansible.cfg
 ├── ansible_hosts
 ├── group_vars
-│   └── catalyst_vars.yaml
+│   ├── catalyst_vars.yaml
+│   └── ios_xe_router_vars.yaml
 ├── reboot.yaml
 └── show-version.yaml
 ```
