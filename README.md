@@ -48,17 +48,18 @@ Below list explains each variable:
 
 3. Modify playbooks to include required hosts to be executed against:
 
+```
 - name: Display running version on Cisco IOS XE switches 
   hosts: all
   connection: network_cli
   gather_facts: yes
   vars_files:
     - group_vars/all.yaml 
-
+```
 In the above section, ensure the hosts variable are correctly identified through ansible_hosts. 
 
 4. Test playbooks by using show-version.yaml. Commands as below: (Note that ansible-vault will prompt for vault password if any of the variable files or playbooks are ansible-vault encrypted.)
 
 ```
    ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml  (omit --ask-vault-pass if ansible-vault is not in used)
-
+```
