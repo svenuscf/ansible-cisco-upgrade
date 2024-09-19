@@ -46,10 +46,10 @@ Finall, for legacy IOS devices that use the "boot system flash" command to point
 
 Group variables are stored in the **group_vars/** sub-directory. Use ```ansible-vault``` to encrypt when necessary.
 
-All IOS XE images should be placed at the **images/** sub-directory. 
+All IOS/IOS-XE images should be placed under the **images/** sub-directory. 
 
 Playbooks breaks down into 4 phases with 4 individual playbooks:
-1. **cleanup-flash.yaml**       - Clean up any unused firmware files to make space on the switche flash.  
+1. **cleanup-flash.yaml**       - Clean up any unused firmware files to make space on the switch flash.  
 2. **upload-image-scp.yaml**    - Upload image file, if not already exist on the switch. This playbook uses SCP to copy file.
 3. **tftp-upload-image.yaml**   - In some cases, when SCP is not available on the devices, use TFTP to transfer image file.
 4. **file-validity-check.yaml** - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
@@ -60,7 +60,7 @@ These playbooks should be executed in the sequence listed above.
 
 ## Preparing the playbooks for execution
 
-1. Modifying **catalyst_vars.yaml** file , **ios_xe_router_vars.yaml** or **generic_ios_vars.yaml** depending on use case, under **group_var**s sub-directory:
+1. Modifying **catalyst_vars.yaml** , **ios_xe_router_vars.yaml** or **generic_ios_vars.yaml** depending on use case, under **group_var**s sub-directory:
 
 Before executing the playbooks, make sure to change the variables in **all.yaml** according to the needs.
 It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
@@ -83,10 +83,11 @@ Below list explains each variable:
 - **ftp_password**            : FTP password used. 
 
 
-2. Modify ansible_hosts. 
+2. Modify **ansible_hosts** to fit in devices. 
 
 3. Modify playbooks to include required hosts to be executed against:
 
+Update the ```hosts: all``` to reflect individual device names, or section of devices defined in **ansible_hosts**.
 ```
 - name: Display running version on Cisco IOS XE switches 
   hosts: all
@@ -95,7 +96,6 @@ Below list explains each variable:
   vars_files:
     - ../group_vars/catalyst_vars.yaml 
 ```
-In the above section, ensure the hosts variable are correctly identified through ansible_hosts. 
 
 4. Test playbooks by using ```show-version.yaml```. Commands as below: (Note that ansible-vault will prompt for vault password if any of the variable files or playbooks are ansible-vault encrypted.)
 
@@ -109,7 +109,7 @@ In the above section, ensure the hosts variable are correctly identified through
 
 
 5. Download required firmware file and upload to the Ansible host (assuming SCP will be used to transfer file from host to devices), 
-and put it under the **images/** sub-directory.
+and put it under the **images/** sub-directory. It is assumed that before uploading the firmware to devices, the image should be verified with MD5 checksum against the published value on Cisco site.
 
 6. Deploy the upgrade by running the sequence of playbooks listed above.
 
