@@ -5,11 +5,8 @@ cli:
   password: cisco123
 ansible_network_os: ios
 ansible_command_timeout: 18000
-upgrade_ios_version: 16.09.07
-upgrade_file: "c1100-universalk9_ias.16.09.07.SPA.bin"
-upgrade_path: "images/c1100-universalk9_ias.16.09.07.SPA.bin"
-router_file: "bootflash:/c1100-universalk9_ias.16.09.07.SPA.bin"
-ftp_file: "~/ansible/images/c1100-universalk9_ias.16.09.07.SPA.bin"
-ftp_ip: 192.168.20.100
-ftp_username: ftp_user
-ftp_password: ftp_Password!23
+upgrade_ios_version: 16.09.06
+upgrade_file: "c1100-universalk9_ias.16.09.06.SPA.bin"
+upgrade_path: "images/c1100-universalk9_ias.16.09.06.SPA.bin"
+router_file: "bootflash:/c1100-universalk9_ias.16.09.06.SPA.bin"
+tftp_server_ip: 192.168.12.4

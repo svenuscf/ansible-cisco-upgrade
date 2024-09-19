@@ -1,16 +1,16 @@
 ---
-# Ansible Playbook to uploade images to Cisco Routers running IOS XE
+# Ansible Playbook to uploade images to Cisco Devices running generic IOS
 # Check available space and quit if failed
 # Playbook will also check if the file already exists on the switch before uploading
 #
 # Upload will utilize SCP and the playbook will mandatorily turn on SCP on the router (without saving)
 #
-- name: Upload images to Cisco IOS XE Routers
+- name: Upload images to Cisco IOS Devices
   hosts: c1100
   connection: network_cli
   gather_facts: yes
   vars_files:
-    - ../group_vars/ios_xe_router_vars.yaml
+    - ../group_vars/generic_ios_vars.yaml
 
   tasks:
     - name: Check Current Version
@@ -50,7 +50,7 @@
       set_fact:
         free_space: "{{ ansible_net_filesystems_info['bootflash:']['spacefree_kb'] }}"
 
-    - name: Check if the switch has enough space for the new image file
+    - name: Check if the device has enough space for the new image file
       assert:
         that:
           - (file_size_kb | int) < (free_space | int)
@@ -59,7 +59,7 @@
 
 # Check if the new image file already exists on the switch
 
-    - name: Check if the file exists on the switch
+    - name: Check if the file exists on the device
       cisco.ios.ios_command:
         commands: "dir {{ router_file }}"
       register: file_check
@@ -70,7 +70,7 @@
         file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
 
 # Enable SCP server on the switch if new image does not exist and prepare to upload 
-    - name: Enable SCP server on the Cisco router
+    - name: Enable SCP server on the Cisco Device 
       cisco.ios.ios_config:
         lines:
           - ip scp server enable
@@ -80,7 +80,7 @@
 
 # Use SCP to upload image file
 # Set file transfer timeout to 40 minutes
-    - name: Upload file via SCP to the router
+    - name: Upload file via SCP to the device
       net_put:
         src: "../{{ upgrade_path }}"
         dest: "{{ router_file }}"

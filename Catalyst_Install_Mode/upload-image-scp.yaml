@@ -4,8 +4,6 @@
 # Playbook will also check if the file already exists on the switch before uploading
 #
 # Upload will utilize SCP and the playbook will mandatorily turn on SCP on the switch (without saving)
-# Once the file is on the switch (either by upload or already on the switch), MD5 checksum will be checked to see validity of the image file.
-# An error message will be prompted if the file is corrupted.
 #
 - name: Upload images to Cisco IOS XE Switches
   hosts: all

@@ -1,0 +1,57 @@
+---
+# Ansible Playbook to change the boot variable to directo Cisco device to run from new image.
+# This playbook checks if the device has the correct boot system command.
+# Then will update the command and do a reload.
+#
+- name: Activate Cisco IOS Device via changing boot variable 
+  hosts: c1100
+  connection: network_cli
+  gather_facts: no
+  vars_files:
+    - ../group_vars/generic_ios_vars.yaml
+
+  tasks:
+    - name: Check Current Version
+      ios_facts:
+    - debug:
+        msg:
+        - "Current version is {{ ansible_net_version }}"
+
+    - debug:
+        msg:
+        - "Image is compliant. Upgrade will not be performed."
+      when: ansible_net_version == upgrade_ios_version
+
+    - debug:
+        msg:
+        - "Image is not compliant. Routers will be upgraded."
+      when: ansible_net_version != upgrade_ios_version
+
+    - name: Run "show run | inc boot system" to capture existing boot system command 
+      cisco.ios.ios_command:
+        commands:
+          - show run | inc boot system
+      register: boot_output
+
+    - name: Check if there are multiple boot system commands.
+      assert:
+        that:
+          - boot_output.stdout_lines[0] | length == 1
+        fail_msg: "Multiple boot system commands found, please fix before proceeding."
+      when: boot_output.stdout_lines[0] | length > 1
+
+    - name: Prepend 'no' to the boot system command to remove them
+      set_fact:
+        no_boot_system_cmds: "{{ boot_output.stdout[0] | map('regex_replace', '^', 'no ') | list }}"
+
+    - name: Apply 'no boot system' commands to remove old boot system configurations
+      ios_config:
+        lines: "{{ no_boot_system_cmds }}"
+      save_when: always
+
+    - name: Apply the new boot system command
+      ios_config:
+        lines:
+          - "boot system flash {{ router_file }}"
+      save_when: always
+

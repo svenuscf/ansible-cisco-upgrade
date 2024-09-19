@@ -11,11 +11,39 @@
     - ../group_vars/ios_xe_router_vars.yaml
 
   tasks:
-  - name: Cleanup using install remove inactive commands
-    cli_command:
-      command: install remove inactive
-      prompt:
-        - remove the above files
-      answer:
-        - y
-    register: cleanup_output
+    - name: Run "show run | inc boot system" to check if the router is in INSTALL mode
+      cisco.ios.ios_command:
+        commands:
+          - show run | inc boot system
+      register: boot_output
+
+    - name: Check if there are multiple boot system commands.
+      assert:
+        that:
+          - boot_output.stdout_lines[0] | length == 1
+        fail_msg: "Multiple boot system commands found, please fix before proceeding."
+      when: boot_output.stdout_lines[0] | length > 1
+
+    - name: Parse "show run | inc boot system" output for INSTALL mode
+      set_fact:
+        in_install_mode: "{{ 'packages.conf' in boot_output.stdout[0] }}"
+
+    - name: Display whether the router is in INSTALL mode
+      debug:
+        msg: "The router is in INSTALL mode: {{ in_install_mode }}"
+      when: boot_output.stdout_lines[0] | length == 1
+
+    - name: Fail if the router is not in INSTALL mode
+      fail:
+        msg: "The router is not in INSTALL mode. The operation cannot be proceeded."
+      when: in_install_mode == False
+
+    - name: Cleanup using install remove inactive commands
+      cli_command:
+        command: install remove inactive
+        prompt:
+          - remove the above files
+        answer:
+          - y
+      register: cleanup_output
+      when: in_install_mode == True

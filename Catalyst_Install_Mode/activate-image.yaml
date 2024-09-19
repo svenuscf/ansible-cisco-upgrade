@@ -5,15 +5,13 @@
 # This playbook works for upgrade from 16.X to 17.X , from INSTALL mode to INSTALL mode
 #
 - name: Activate Cisco IOS XE Switches upgrade via install
-  hosts: all
+  hosts: ios_xe
   connection: network_cli
   gather_facts: yes
   vars_files:
     - ../group_vars/catalyst_vars.yaml
 
   tasks:
-    - name: Check Current Version
-      ios_facts:
     - debug:
         msg:
         - "Current version is {{ ansible_net_version }}"
@@ -25,7 +23,7 @@
 
     - debug:
         msg:
-        - "Image is not compliant and will be upgraded."
+        - "Image is not compliant and switch will be upgraded."
       when: ansible_net_version != upgrade_ios_version
 
     - name: Run "show version" to check if the switch is in INSTALL mode

@@ -1,30 +1,40 @@
-# Ansible Playbooks to upgrade Cisco IOS XE Switches
+# Ansible Playbooks to upgrade Cisco Devices
 
 ## Introduction
-These playbooks are used to upgrade Cisco IOS XE Switches.
+These playbooks are used to upgrade Cisco IOS/IOS-XE Devices.
 
-Assume switches are running in INSTALL mode and will also be upgraded using INSTALL mode.
+For Catalyst using INSTALL mode (e.g. Catalyst 9200, Catalyst 9300, Catalyst 3K using INSTALL mode), use playbooks under the **Catalyst_Install_Mode** directory.
 
-If BUNDLE mode is involed, further development on new playbook is required. 
+For Routers running IOS-XE and already running in INSTALL mode (i.e. boot system is pointing to bootflash:/packages.conf), use playbooks under the **IOS_XE_Router_Install_Mode** directory.
+
+Finall, for legacy IOS devices that use the "boot system flash" command to point to the firmware file on the flash, use playbooks under the **Legacy_Bundle_Mode** directory.
+
 
 ## File Structure
 ```
+.
 ├── Catalyst_Install_Mode
-│   ├── activate-image.yaml
-│   ├── cleanup-flash.yaml
-│   ├── file-validity-check.yaml
-│   └── upload-image-scp.yaml
+│   ├── activate-image.yaml
+│   ├── cleanup-flash.yaml
+│   ├── file-validity-check.yaml
+│   └── upload-image-scp.yaml
 ├── IOS_XE_Router_Install_Mode
-│   ├── activate-image.yaml
-│   ├── cleanup-flash.yaml
-│   ├── file-validity-check.yaml
-│   └── upload-image-scp.yaml
+│   ├── activate-image.yaml
+│   ├── cleanup-flash.yaml
+│   ├── file-validity-check.yaml
+│   ├── tftp-upload-image.yaml
+│   └── upload-image-scp.yaml
+├── Legacy_Bundle_Mode
+│   ├── activate-image.yaml
+│   ├── file-validity-check.yaml
+│   └── upload-image-scp.yaml
 ├── README.md
 ├── ansible.cfg
 ├── ansible_hosts
 ├── group_vars
-│   ├── catalyst_vars.yaml
-│   └── ios_xe_router_vars.yaml
+│   ├── catalyst_vars.yaml
+│   ├── generic_ios_vars.yaml
+│   └── ios_xe_router_vars.yaml
 ├── reboot.yaml
 └── show-version.yaml
 ```
@@ -39,15 +49,16 @@ All IOS XE images should be placed at the **images/** sub-directory.
 Playbooks breaks down into 4 phases with 4 individual playbooks:
 1. **cleanup-flash.yaml**       - Clean up any unused firmware files to make space on the switche flash.  
 2. **upload-image-scp.yaml**    - Upload image file, if not already exist on the switch. This playbook uses SCP to copy file.
-3. **file-validity-check.yaml** - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
-4. **activate-image.yaml**      - Perform the upgrade using the install command.
+3. **tftp-upload-image.yaml**   - In some cases, when SCP is not available on the devices, use TFTP to transfer image file.
+4. **file-validity-check.yaml** - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
+5. **activate-image.yaml**      - Perform the upgrade using the install command.
 
 These playbooks should be executed in the sequence listed above.
 
 
 ## Preparing the playbooks for execution
 
-1. Modifying **catalyst_vars.yaml** file, under **group_var**s sub-directory:
+1. Modifying **catalyst_vars.yaml** file , **ios_xe_router_vars.yaml** or **generic_ios_vars.yaml** depending on use case, under **group_var**s sub-directory:
 
 Before executing the playbooks, make sure to change the variables in **all.yaml** according to the needs.
 It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
