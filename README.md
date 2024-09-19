@@ -67,6 +67,8 @@ These playbooks should be executed in the sequence listed above.
 It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
 Alternatively, run the ```show-version.yaml``` playbook which displays the running version of devices as well as proving SSH connection from Ansible host is successful.
 
+The intention to split each of the upgrade procedure to use a separate vars file is based on the consideration of the device storage is different. For instance, flash: for Catalyst and bootflash: for routers. The default vars value is already configured to avoid commonly overlooked, which will result in uploading firmware failure.  
+
 Below list explains each variable to be defined in these vars files:
 
 - **username**                : username used to login from Ansible host to the device
