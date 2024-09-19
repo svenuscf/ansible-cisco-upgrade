@@ -1,13 +1,13 @@
 ---
-# Ansible Playbook to start install the new image on Cisco switches running IOS XE
-# This playbook checks if the switch is in install mode, and will quit if not.
+# Ansible Playbook to start install the new image on Cisco routers running IOS XE
+# This playbook checks if the router is in install mode, and will quit if not.
 # Then start the upgrade process
 # This playbook works for upgrade from 16.X to 17.X , from INSTALL mode to INSTALL mode
 #
-- name: Activate Cisco IOS XE Switches upgrade via install
-  hosts: all
+- name: Activate Cisco IOS XE Routers upgrade via install
+  hosts: c1100
   connection: network_cli
-  gather_facts: yes
+  gather_facts: no
   vars_files:
     - ../group_vars/ios_xe_router_vars.yaml
 
@@ -25,31 +25,37 @@
 
     - debug:
         msg:
-        - "Image is not compliant and will be upgraded."
+        - "Image is not compliant. Routers will be upgraded."
       when: ansible_net_version != upgrade_ios_version
 
-    - name: Run "show version" to check if the switch is in INSTALL mode
+    - name: Run "show run | inc boot system" to check if the router is in INSTALL mode
       cisco.ios.ios_command:
         commands:
-          - show version
-      register: version_output
+          - show run | inc boot system
+      register: boot_output
 
-    - name: Parse "show version" output for INSTALL mode
-      set_fact:
-        in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
-
-    - name: Display whether the switch is in INSTALL mode
+    - name: Check if there are multiple boot system commands.
       debug:
-        msg: "The switch is in INSTALL mode: {{ in_install_mode }}"
+        msg: "Multiple boot system commands found, please fix before proceeding: {{ boot_output.stdout_lines[0] | length > 1 }}"
+      when: boot_output.stdout_lines[0] | length > 1
 
-    - name: Fail if the switch is not in INSTALL mode
+    - name: Parse "show run | inc boot system" output for INSTALL mode
+      set_fact:
+        in_install_mode: "{{ 'packages.conf' in boot_output.stdout[0] }}"
+
+    - name: Display whether the router is in INSTALL mode
+      debug:
+        msg: "The router is in INSTALL mode: {{ in_install_mode }}"
+      when: boot_output.stdout_lines[0] | length == 1 
+
+    - name: Fail if the router is not in INSTALL mode
       fail:
-        msg: "The switch is not in INSTALL mode. Install upgrade cannot proceed."
+        msg: "The router is not in INSTALL mode. Install upgrade cannot proceed."
       when: in_install_mode == False
 
-    - name: Run the install command on the switch and handle the prompt
+    - name: Run the install command on the router and handle the prompt
       cli_command:
-        command: 'install add file {{ switch_file }} activate commit'
+        command: 'install add file {{ router_file }} activate commit'
         prompt:
           - proceed
         answer:

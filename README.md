@@ -62,7 +62,8 @@ Below list explains each variable:
 - **upgrade_ios_version**     : This is the version to be upgraded. Note that this should match the returned value from within the Ansible gather facts API. An Example is "16.12.11".
 - **upgrade_file**            : This is the firmware name to be used to upgrade. Directly replace this field with the image name downloaded from Cisco. Example: "cat3k_caa-universalk9.16.06.09.SPA.bin"
 - **upgrade_path**            : This is the path for the Ansible host to locate image file locally. Pay attention to the playbook running directory path. Consider using an absolute path. Example: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-- **switch_file**             : Specifies the location and the filename of the image to be uploaded on the switch. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
+- **switch_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
+- **router_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
 - **ftp_file**                : In some tests, SCP performs worse than FTP in uploading file. In case of using FTP, this variable specifies the image file location of the FTP server. Example: "~/ansible/images/cat3k_caa-universalk9.16.06.09.SPA.bin"
 - **ftp_ip**                  : Specifies the FTP server ip address when FTP is used.
 - **ftp_username**            : FTP user used to copy file.
@@ -79,7 +80,7 @@ Below list explains each variable:
   connection: network_cli
   gather_facts: yes
   vars_files:
-    - ../group_vars/all.yaml 
+    - ../group_vars/catalyst_vars.yaml 
 ```
 In the above section, ensure the hosts variable are correctly identified through ansible_hosts. 
 

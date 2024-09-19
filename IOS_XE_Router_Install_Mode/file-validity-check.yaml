@@ -1,25 +1,25 @@
 ---
-# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+# Ansible Playbook to uploade images to Cisco Routers running IOS XE
 # Check available space and quit if failed
-# Playbook will also check if the file already exists on the switch before uploading
+# Playbook will also check if the file already exists on the router before uploading
 #
-# Upload will utilize SCP and the playbook will mandatorily turn on SCP on the switch (without saving)
-# Once the file is on the switch (either by upload or already on the switch), MD5 checksum will be checked to see validity of the image file.
+# Upload will utilize SCP and the playbook will mandatorily turn on SCP on the router (without saving)
+# Once the file is on the router (either by upload or already on the router), MD5 checksum will be checked to see validity of the image file.
 # An error message will be prompted if the file is corrupted.
 #
 - name: Check images to Cisco IOS XE Switches
-  hosts: all
+  hosts: c1100
   connection: network_cli
   gather_facts: yes
   vars_files:
     - ../group_vars/ios_xe_router_vars.yaml
 
   tasks:
-# Check if the new image file already exists on the switch
+# Check if the new image file already exists on the router
 
-    - name: Check if the file exists on the switch
+    - name: Check if the file exists on the router
       cisco.ios.ios_command:
-        commands: "dir {{ switch_file }}"
+        commands: "dir {{ router_file }}"
       register: file_check
       ignore_errors: yes
 
@@ -50,10 +50,10 @@
         - file_exists == True
         - ansible_net_version != upgrade_ios_version
 
-    - name: Get the checksum of the file on the switch
+    - name: Get the checksum of the file on the router
       cisco.ios.ios_command:
         commands:
-          - verify /md5 {{ switch_file }}
+          - verify /md5 {{ router_file }}
       register: checksum_output
       when:
         - file_exists == True
@@ -80,9 +80,9 @@
         - file_exists == True
         - ansible_net_version != upgrade_ios_version
 
-    - name: Display checksum on the switch
+    - name: Display checksum on the router
       debug:
-        msg: "Checksum on switch: {{ file_checksum }}"
+        msg: "Checksum on router: {{ file_checksum }}"
       when:
         - file_exists == True
         - ansible_net_version != upgrade_ios_version

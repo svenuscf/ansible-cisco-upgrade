@@ -12,7 +12,7 @@
   connection: network_cli
   gather_facts: yes
   vars_files:
-    - group_vars/all.yaml
+    - ../group_vars/catalyst_vars.yaml
 
   tasks:
 # Check if the new image file already exists on the switch

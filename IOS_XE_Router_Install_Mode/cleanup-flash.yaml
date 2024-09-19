@@ -3,8 +3,8 @@
 #
 # This play book cleans up unused firmware package files on the flash
 #
-- name: Cleanup unused firmware package files on Cisco IOS XE Switches
-  hosts: all
+- name: Cleanup unused firmware package files on Cisco IOS XE Devices
+  hosts: c1100
   connection: network_cli
   gather_facts: yes
   vars_files:

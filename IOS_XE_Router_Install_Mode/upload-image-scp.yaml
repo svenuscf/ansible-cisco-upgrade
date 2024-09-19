@@ -1,14 +1,14 @@
 ---
-# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+# Ansible Playbook to uploade images to Cisco Routers running IOS XE
 # Check available space and quit if failed
 # Playbook will also check if the file already exists on the switch before uploading
 #
-# Upload will utilize SCP and the playbook will mandatorily turn on SCP on the switch (without saving)
+# Upload will utilize SCP and the playbook will mandatorily turn on SCP on the router (without saving)
 # Once the file is on the switch (either by upload or already on the switch), MD5 checksum will be checked to see validity of the image file.
 # An error message will be prompted if the file is corrupted.
 #
-- name: Upload images to Cisco IOS XE Switches
-  hosts: all
+- name: Upload images to Cisco IOS XE Routers
+  hosts: c1100
   connection: network_cli
   gather_facts: yes
   vars_files:
@@ -50,7 +50,7 @@
 
     - name: Set free space variable for flash
       set_fact:
-        free_space: "{{ ansible_net_filesystems_info['flash:']['spacefree_kb'] }}"
+        free_space: "{{ ansible_net_filesystems_info['bootflash:']['spacefree_kb'] }}"
 
     - name: Check if the switch has enough space for the new image file
       assert:
@@ -63,7 +63,7 @@
 
     - name: Check if the file exists on the switch
       cisco.ios.ios_command:
-        commands: "dir {{ switch_file }}"
+        commands: "dir {{ router_file }}"
       register: file_check
       ignore_errors: yes
 
@@ -72,7 +72,7 @@
         file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
 
 # Enable SCP server on the switch if new image does not exist and prepare to upload 
-    - name: Enable SCP server on the Cisco switch
+    - name: Enable SCP server on the Cisco router
       cisco.ios.ios_config:
         lines:
           - ip scp server enable
@@ -82,11 +82,10 @@
 
 # Use SCP to upload image file
 # Set file transfer timeout to 40 minutes
-#
-    - name: Upload file via SCP to the switch
+    - name: Upload file via SCP to the router
       net_put:
-        src: "{{ upgrade_path }}"
-        dest: "{{ switch_file }}"
+        src: "../{{ upgrade_path }}"
+        dest: "{{ router_file }}"
       vars:
         ansible_command_timeout: 6000
       when: 
