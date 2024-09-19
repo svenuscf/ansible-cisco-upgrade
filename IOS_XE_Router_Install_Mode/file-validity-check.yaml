@@ -10,7 +10,7 @@
 - name: Check images to Cisco IOS XE Switches
   hosts: c1100
   connection: network_cli
-  gather_facts: yes
+  gather_facts: no
   vars_files:
     - ../group_vars/ios_xe_router_vars.yaml
 

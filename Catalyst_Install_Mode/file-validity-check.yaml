@@ -10,7 +10,7 @@
 - name: Check images to Cisco IOS XE Switches
   hosts: all
   connection: network_cli
-  gather_facts: yes
+  gather_facts: no
   vars_files:
     - ../group_vars/catalyst_vars.yaml
 
