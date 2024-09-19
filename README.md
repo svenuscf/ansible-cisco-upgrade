@@ -14,27 +14,29 @@ Finall, for legacy IOS devices that use the "boot system flash" command to point
 ```
 .
 ├── Catalyst_Install_Mode
-│   ├── activate-image.yaml
-│   ├── cleanup-flash.yaml
-│   ├── file-validity-check.yaml
-│   └── upload-image-scp.yaml
+│   ├── activate-image.yaml
+│   ├── cleanup-flash.yaml
+│   ├── file-validity-check.yaml
+│   ├── tftp-upload-image.yaml
+│   └── upload-image-scp.yaml
 ├── IOS_XE_Router_Install_Mode
-│   ├── activate-image.yaml
-│   ├── cleanup-flash.yaml
-│   ├── file-validity-check.yaml
-│   ├── tftp-upload-image.yaml
-│   └── upload-image-scp.yaml
+│   ├── activate-image.yaml
+│   ├── cleanup-flash.yaml
+│   ├── file-validity-check.yaml
+│   ├── tftp-upload-image.yaml
+│   └── upload-image-scp.yaml
 ├── Legacy_Bundle_Mode
-│   ├── activate-image.yaml
-│   ├── file-validity-check.yaml
-│   └── upload-image-scp.yaml
+│   ├── activate-image.yaml
+│   ├── file-validity-check.yaml
+│   ├── tftp-upload-image.yaml
+│   └── upload-image-scp.yaml
 ├── README.md
 ├── ansible.cfg
 ├── ansible_hosts
 ├── group_vars
-│   ├── catalyst_vars.yaml
-│   ├── generic_ios_vars.yaml
-│   └── ios_xe_router_vars.yaml
+│   ├── catalyst_vars.yaml
+│   ├── generic_ios_vars.yaml
+│   └── ios_xe_router_vars.yaml
 ├── reboot.yaml
 └── show-version.yaml
 ```
