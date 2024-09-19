@@ -62,7 +62,8 @@ These playbooks should be executed in the sequence listed above.
 
 1. Modifying **catalyst_vars.yaml** , **ios_xe_router_vars.yaml** or **generic_ios_vars.yaml** depending on use case, under **group_var**s sub-directory:
 
-Before executing the playbooks, make sure to change the variables in **all.yaml** according to the needs.
+*Before executing the playbooks, make sure to change the variables in **[catalyst|ios_xe_router|generic]_vars.yaml** to reflect targeted upgrade version, image file location, bootflash location etc. An ansible timeout value is also included in these vars files. In the case of uploading firmware to devices, it is recommended to tune up this timeout value to allow Ansible to finish the upload task without timeouting the session. For sites using 4G, it is particularly important to account for the time for these upload tasks.*
+
 It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
 Alternatively, run the ```show-version.yaml``` playbook which displays the running version of devices as well as proving SSH connection from Ansible host is successful.
 
