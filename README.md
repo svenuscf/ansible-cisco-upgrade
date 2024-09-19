@@ -67,7 +67,7 @@ These playbooks should be executed in the sequence listed above.
 It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
 Alternatively, run the ```show-version.yaml``` playbook which displays the running version of devices as well as proving SSH connection from Ansible host is successful.
 
-Below list explains each variable:
+Below list explains each variable to be defined in these vars files:
 
 - **username**                : username used to login from Ansible host to the device
 - **password**                : password used to login from Ansible host to the device. Recommended to use ansible-vault to encrypt this file.
@@ -76,12 +76,9 @@ Below list explains each variable:
 - **upgrade_ios_version**     : This is the version to be upgraded. Note that this should match the returned value from within the Ansible gather facts API. An Example is "16.12.11".
 - **upgrade_file**            : This is the firmware name to be used to upgrade. Directly replace this field with the image name downloaded from Cisco. Example: "cat3k_caa-universalk9.16.06.09.SPA.bin"
 - **upgrade_path**            : This is the path for the Ansible host to locate image file locally. Pay attention to the playbook running directory path. Consider using an absolute path. Example: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-- **switch_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
-- **router_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"
-- **ftp_file**                : In some tests, SCP performs worse than FTP in uploading file. In case of using FTP, this variable specifies the image file location of the FTP server. Example: "~/ansible/images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-- **ftp_ip**                  : Specifies the FTP server ip address when FTP is used.
-- **ftp_username**            : FTP user used to copy file.
-- **ftp_password**            : FTP password used. 
+- **switch_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin". This variable is used in the Catalyst Install playbooks.
+- **router_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin". This variable is used in the IOS XE Router Install, and Legacy IOS Device playbooks.
+- **tftp_server_ip**          : Specifies the TFTP server ip address when TFTP is used.
 
 
 2. Modify **ansible_hosts** to fit in devices. 
