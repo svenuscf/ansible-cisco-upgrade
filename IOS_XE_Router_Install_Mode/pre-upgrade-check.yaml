@@ -121,7 +121,7 @@
         module: lineinfile
         path: "../log/health-check-{{ current_timestamp }}.log"
         line: |
-          Health Check Report for {{ inventory_hostname}} - {{ current_timestamp }} | Ready for Upgrade: {% if firmware_check.failed or md5_check.failed %} NO {% else %} YES {% endif %} 
+          Health Check Report for {{ inventory_hostname}} - {{ current_timestamp }} | Ready for Upgrade: {% if firmware_check.failed or md5_check.failed %} NO {% else %} YES {% endif %} | Firmware Upgrade Needed: {% if ansible_net_version == upgrade_ios_version %} NO {% else %} YES {% endif %}
           -----------------------------
           Switch Mode: {{ router_mode }}
           Firmware File Existence: {% if firmware_check.failed %} MISSING {% else %} PRESENT {% endif %}
@@ -130,7 +130,6 @@
 
           Current Version: {{ ansible_net_version }}
           Target Version: {{ upgrade_ios_version }}
-          Firmware Upgrade Needed: {% if ansible_net_version == upgrade_ios_version %} NO {% else %} YES {% endif %}
 
           ---------------------------------------------------
 
