@@ -3,11 +3,11 @@
 ## Introduction
 These playbooks are used to upgrade Cisco IOS/IOS-XE Devices.
 
-For Catalyst using INSTALL mode (e.g. Catalyst 9200, Catalyst 9300, Catalyst 3K using INSTALL mode), use playbooks under the **Catalyst_Install_Mode** directory.
+- For Catalyst using INSTALL mode (e.g. Catalyst 9200, Catalyst 9300, Catalyst 3K using INSTALL mode), use playbooks under the **Catalyst_Install_Mode** directory.
 
-For Routers running IOS-XE and already running in INSTALL mode (i.e. boot system is pointing to bootflash:/packages.conf), use playbooks under the **IOS_XE_Router_Install_Mode** directory.
+- For Routers running IOS-XE and already running in INSTALL mode (i.e. boot system is pointing to ```bootflash:/packages.conf```), use playbooks under the **IOS_XE_Router_Install_Mode** directory.
 
-Finall, for legacy IOS devices that use the "boot system flash" command to point to the firmware file on the flash, use playbooks under the **Legacy_Bundle_Mode** directory.
+- For Legacy IOS devices that use the "boot system flash" command to point to the firmware file on the flash, use playbooks under the **Legacy_Bundle_Mode** directory.
 
 
 ## File Structure
@@ -44,50 +44,48 @@ Finall, for legacy IOS devices that use the "boot system flash" command to point
 
 ## Usage
 
-Group variables are stored in the **group_vars/** sub-directory. Use ```ansible-vault``` to encrypt when necessary.
+Group variables are stored in the **group_vars/** sub-directory. Use ```ansible-vault``` to encrypt these variable files in production as there are senstive credentials.
 
 All IOS/IOS-XE images should be placed under the **images/** sub-directory. 
 
 Playbooks breaks down into 4 phases with 4 individual playbooks:
-1. **cleanup-flash.yaml**       - Clean up any unused firmware files to make space on the switch flash.  
-2. **upload-image-scp.yaml**    - Upload image file, if not already exist on the switch. This playbook uses SCP to copy file.
-3. **tftp-upload-image.yaml**   - In some cases, when SCP is not available on the devices, use TFTP to transfer image file.
-4. **file-validity-check.yaml** - Check the md5 checksum against calculated value on the host to verify validity of the file post upload.
+1. **cleanup-flash.yaml**       - Clean up any unused firmware files to free up space on the network devices.  
+2. **upload-image-scp.yaml**    - Upload the image file using SCP. This playbook assumes the image doesn't already exist on the device.
+3. **tftp-upload-image.yaml**   - Alternatively, use TFTP to upload the image file to the device. TFTP is found to be faster than SCP in some testings. 
+4. **file-validity-check.yaml** - Validate the uploaded image by comparing its MD5 checksum against the host's calculated value.
 5. **activate-image.yaml**      - Perform the upgrade using the install command.
 
-These playbooks should be executed in the sequence listed above.
+The playbooks should be executed in this sequence.
 
 
 ## Preparing the playbooks for execution
 
-1. Modifying **catalyst_vars.yaml** , **ios_xe_router_vars.yaml** or **generic_ios_vars.yaml** depending on use case, under **group_var**s sub-directory:
+1. The group variables for different types of devices are stored in **catalyst_vars.yaml**, **ios_xe_router_vars.yaml** and **generic_ios_vars.yaml**, under the **group_var**s sub-directory:
 
-*Before executing the playbooks, make sure to change the variables in **[catalyst|ios_xe_router|generic]_vars.yaml** to reflect targeted upgrade version, image file location, bootflash location etc. An ansible timeout value is also included in these vars files. In the case of uploading firmware to devices, it is recommended to tune up this timeout value to allow Ansible to finish the upload task without timeouting the session. For sites using 4G, it is particularly important to account for the time for these upload tasks.*
+Make sure to update these variables based on your target upgrade version, image file location, bootflash location, etc. Pay particular attention to the ```ansible_command_timeout``` value for longer tasks like file uploads, especially on slower networks like 4G.
 
-It is also recommended to test ssh connection from Ansible host to the devices before executing these playbooks.
-Alternatively, run the ```show-version.yaml``` playbook which displays the running version of devices as well as proving SSH connection from Ansible host is successful.
-
-The intention to split each of the upgrade procedure to use a separate vars file is based on the consideration of the device storage is different. For instance, flash: for Catalyst and bootflash: for routers. The default vars value is already configured to avoid commonly overlooked, which will result in uploading firmware failure.  
-
-Below list explains each variable to be defined in these vars files:
-
-- **username**                : username used to login from Ansible host to the device
-- **password**                : password used to login from Ansible host to the device. Recommended to use ansible-vault to encrypt this file.
-- **ansible_network_os**      : instruct Ansible to detect network device platform. Use "ios" for Cisco IOS or IOS-XE devices.
-- **ansible_command_timeout** : Ansible default command timeout value. In a typical situation, 30 seconds is enough. However, larger value is required for longer operation like uploading file from the host. 
-- **upgrade_ios_version**     : This is the version to be upgraded. Note that this should match the returned value from within the Ansible gather facts API. An Example is "16.12.11".
-- **upgrade_file**            : This is the firmware name to be used to upgrade. Directly replace this field with the image name downloaded from Cisco. Example: "cat3k_caa-universalk9.16.06.09.SPA.bin"
-- **upgrade_path**            : This is the path for the Ansible host to locate image file locally. Pay attention to the playbook running directory path. Consider using an absolute path. Example: "images/cat3k_caa-universalk9.16.06.09.SPA.bin"
-- **switch_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin". This variable is used in the Catalyst Install playbooks.
-- **router_file**             : Specifies the location and the filename of the image to be uploaded on the device. Some devices may use bootflash instead of flash. Example: "flash:/cat3k_caa-universalk9.16.06.09.SPA.bin". This variable is used in the IOS XE Router Install, and Legacy IOS Device playbooks.
-- **tftp_server_ip**          : Specifies the TFTP server ip address when TFTP is used.
+Key variables include:
+- **username**                : Login username for the device.
+- **password**                : Login password. Use ```ansible-vault``` to encrypt this for security.
+- **ansible_network_os**      : Set to ```"ios"``` for Cisco IOS or IOS-XE devices.
+- **ansible_command_timeout** : Timeout for long-running operations (e.g., image uploads).
+- **upgrade_ios_version**     : Target IOS version (e.g., ```"16.12.11"```).
+- **upgrade_file**            : Firmware file name (e.g., ```"cat3k_caa-universalk9.16.06.09.SPA.bin"```).
+- **upgrade_path**            : Path to the image on the Ansible host (e.g., ```"images/cat3k_caa-universalk9.16.06.09.SPA.bin"```).
+- **switch_file**             : Target location and name on the device for Catalyst switches (e.g., ```"flash:/cat3k_caa-universalk9.16.06.09.SPA.bin"```).
+- **router_file**             : Target location and name on the device for routers (e.g., ```"bootflash:/cat3k_caa-universalk9.16.06.09.SPA.bin"```).
+- **tftp_server_ip**          : IP address of the TFTP server.
 
 
-2. Modify **ansible_hosts** to fit in devices. 
+2. Modify the Inventory (```ansible_hosts```) 
 
-3. Modify playbooks to include required hosts to be executed against:
+Ensure your ```ansible_hosts``` file reflects the devices to be upgraded.
 
-Update the ```hosts: all``` to reflect individual device names, or section of devices defined in **ansible_hosts**.
+3. Update Playbooks with Correct Hosts
+
+In each playbook, replace ```hosts: all``` with the appropriate device group or individual host from your ```ansible_hosts``` file.
+
+Example:
 ```
 - name: Display running version on Cisco IOS XE switches 
   hosts: all
@@ -97,21 +95,26 @@ Update the ```hosts: all``` to reflect individual device names, or section of de
     - ../group_vars/catalyst_vars.yaml 
 ```
 
-4. Test playbooks by using ```show-version.yaml```. Commands as below: (Note that ansible-vault will prompt for vault password if any of the variable files or playbooks are ansible-vault encrypted.)
+4. Test **SSH** Connectivity
 
+Before running any upgrade playbooks, it’s recommended to test the SSH connection from the Ansible host to the target devices by running the **show-version.yaml** playbook.
 ```
    ansible-playbook -i ansible_hosts --ask-vault-pass show-version.yaml
 ```
-   (omit --ask-vault-pass if ansible-vault is not in used)  OR to run the real playbooks:
+(Use --ask-vault-pass if any of the files are encrypted with ansible-vault.)
+
+5. Upload the Firmware File
+
+Download the required firmware image and place it in the **images/** directory on your Ansible host. Verify the MD5 checksum of the image before uploading it to the devices.
+
+6. Execute the Upgrade Playbooks
+
+Run the playbooks in sequence:
 ```
-   ansible-playbook -i ansible_hosts Catalyst_Install_Mode/cleanup-flash.yaml
+ansible-playbook -i ansible_hosts Catalyst_Install_Mode/cleanup-flash.yaml
 ```
 
-
-5. Download required firmware file and upload to the Ansible host (assuming SCP will be used to transfer file from host to devices), 
-and put it under the **images/** sub-directory. It is assumed that before uploading the firmware to devices, the image should be verified with MD5 checksum against the published value on Cisco site.
-
-6. Deploy the upgrade by running the sequence of playbooks listed above.
+Once the flash is cleared, proceed with the image upload, verification, and activation.
 
 
 ## Contributor
