@@ -1,0 +1,139 @@
+---
+- name: Health check playbook for upgrade readiness
+  hosts: c1100 
+  connection: network_cli
+  gather_facts: no
+  vars_files:
+    - ../group_vars/generic_ios_vars.yaml
+
+  tasks:
+
+    # Task 1: Check if the device requires upgrade
+    - name: Check if the router requires upgrade
+      ios_facts:
+    - debug:
+        msg:
+        - "Current version is {{ ansible_net_version }}. Target version is {{ upgrade_ios_version }}"
+      when: ansible_net_version != upgrade_ios_version
+
+    # Task 2: Check whether the router is in INSTALL or BUNDLE mode
+    - name: Run "show version | inc boot system" to check if the router is in INSTALL mode
+      cisco.ios.ios_command:
+        commands:
+          - show version
+      register: version_output
+
+    - name: Determine mode from show version output
+      set_fact:
+        router_mode: >
+          {% if 'packages.conf' in version_output.stdout[0] %}
+            INSTALL
+          {% else %}
+            BUNDLE
+          {% endif %}
+
+    - name: Log router mode
+      debug:
+        msg: "Router is running in {{ router_mode }} mode."
+
+    # Task 3: Check if the firmware file is uploaded
+    - name: Check if target firmware file exists on router
+      cli_command:
+        command: "dir {{ router_file }}"
+      register: firmware_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Log firmware existence
+      debug:
+        msg: >
+          {% if firmware_check.failed %}
+            Firmware file {{ upgrade_file }} does not exist on the router.
+          {% else %}
+            Firmware file {{ upgrade_file }} exists on the router.
+          {% endif %}
+
+    # Task 4: Verify MD5 checksum
+    - name: Run md5sum to calculate checksum
+      command: "md5sum {{ upgrade_path }}"
+      register: md5_output
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Extract the MD5 checksum from md5sum output
+      set_fact:
+        file_md5sum: "{{ md5_output.stdout.split()[0] }}"
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Get the checksum of the file on the router
+      cisco.ios.ios_command:
+        commands:
+          - verify /md5 {{ router_file }}
+      register: checksum_output
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Flatten the stdout lines to handle multi-line output
+      set_fact:
+        flat_output: "{{ checksum_output.stdout_lines | flatten }}"
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Extract the checksum from the output
+      set_fact:
+        file_checksum: "{{ flat_output | select ('search', 'verify /md5') | first | regex_search('=\\s*(\\w+)', '\\1') }}" 
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Convert the checksum from list to string (if necessary)
+      set_fact:
+        file_checksum: "{{ file_checksum[0] if file_checksum is iterable else file_checksum }}"
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Verify MD5 checksum of the uploaded file
+      cli_command:
+        command: "verify /md5 {{ router_file }} "
+      register: md5_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Log MD5 checksum status
+      debug:
+        msg: >
+          {% if file_md5sum != file_checksum %}
+            MD5 checksum for {{ upgrade_file }} does not match! File might be corrupted.
+          {% else %}
+            MD5 checksum for {{ upgrade_file }} matches. File is valid.
+          {% endif %}
+      ignore_errors: yes
+      changed_when: false
+
+    # Task 5: Generate current date and time
+    - name: Generate current date and time
+      set_fact:
+        current_timestamp: "{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}"
+
+    # Task 6: Summarize and export results to a log file with a timestamp
+    - name: Summarize and export health check results
+      local_action:
+        module: lineinfile
+        path: "../log/health-check-{{ current_timestamp }}.log"
+        line: |
+          Health Check Report for {{ inventory_hostname}} - {{ current_timestamp }} | Ready for Upgrade: {% if firmware_check.failed or md5_check.failed %} NO {% else %} YES {% endif %} 
+          -----------------------------
+          Switch Mode: {{ router_mode }}
+          Firmware File Existence: {% if firmware_check.failed %} MISSING {% else %} PRESENT {% endif %}
+
+          MD5 Checksum: {% if md5_check.failed %} FAILED {% else %} PASSED {% endif %}
+
+          Current Version: {{ ansible_net_version }}
+          Target Version: {{ upgrade_ios_version }}
+          Firmware Upgrade Needed: {% if ansible_net_version == upgrade_ios_version %} NO {% else %} YES {% endif %}
+
+          ---------------------------------------------------
+
+        create: yes
+
+

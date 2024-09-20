@@ -17,17 +17,20 @@ These playbooks are used to upgrade Cisco IOS/IOS-XE Devices.
 │   ├── activate-image.yaml
 │   ├── cleanup-flash.yaml
 │   ├── file-validity-check.yaml
+│   ├── pre-upgrade-check.yaml
 │   ├── tftp-upload-image.yaml
 │   └── upload-image-scp.yaml
 ├── IOS_XE_Router_Install_Mode
 │   ├── activate-image.yaml
 │   ├── cleanup-flash.yaml
 │   ├── file-validity-check.yaml
+│   ├── pre-upgrade-check.yaml
 │   ├── tftp-upload-image.yaml
 │   └── upload-image-scp.yaml
 ├── Legacy_Bundle_Mode
 │   ├── activate-image.yaml
 │   ├── file-validity-check.yaml
+│   ├── pre-upgrade-check.yaml
 │   ├── tftp-upload-image.yaml
 │   └── upload-image-scp.yaml
 ├── README.md
@@ -37,6 +40,7 @@ These playbooks are used to upgrade Cisco IOS/IOS-XE Devices.
 │   ├── catalyst_vars.yaml
 │   ├── generic_ios_vars.yaml
 │   └── ios_xe_router_vars.yaml
+├── log
 ├── reboot.yaml
 └── show-version.yaml
 ```
@@ -53,7 +57,8 @@ Playbooks breaks down into 4 phases with 4 individual playbooks:
 2. **upload-image-scp.yaml**    - Upload the image file using SCP. This playbook assumes the image doesn't already exist on the device.
 3. **tftp-upload-image.yaml**   - Alternatively, use TFTP to upload the image file to the device. TFTP is found to be faster than SCP in some testings. 
 4. **file-validity-check.yaml** - Validate the uploaded image by comparing its MD5 checksum against the host's calculated value.
-5. **activate-image.yaml**      - Perform the upgrade using the install command.
+5. **pre-upgrade-check.yaml**   - Perform a pre-upgrade check and write the results to a logfile under **log/** directory.
+6. **activate-image.yaml**      - Perform the upgrade using the install command.
 
 The playbooks should be executed in this sequence.
 
@@ -116,6 +121,25 @@ ansible-playbook -i ansible_hosts Catalyst_Install_Mode/cleanup-flash.yaml
 ```
 
 Once the flash is cleared, proceed with the image upload, verification, and activation.
+
+Alternatively, before proceeding to activate the image, perform a pre-upgrade check by running the ```pre-upgrade-check.yaml``` playbook. The results will be stored in a log file under the **log/** directory.
+
+To view a summary of device upgrade readiness, use the following command:
+```
+grep Report log/*
+```
+
+### 7. Logging Playbook Outputs
+
+Ansible has built-in logging capabilities. It is recommended to direct playbook outputs to a log file for later tracing of playbook execution results.
+
+A specific playbook, **pre-upgrade-check.yaml**, has been developed to perform a check against devices and output results to a readable log file. This makes it easier for administrators to see which devices are ready for upgrade and which are not.
+
+For example, to capture the output of the ```show-version.yaml``` playbook into a timestamped log file, use the following command:
+
+```
+ansible-playbook -i ansible_hosts show-version.yaml | tee log/show-version-$(date +%Y-%m-%d_%H-%M-%S).log
+```
 
 
 ## Contributor
