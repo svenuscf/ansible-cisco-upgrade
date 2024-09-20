@@ -60,7 +60,7 @@ The playbooks should be executed in this sequence.
 
 ## Preparing the playbooks for execution
 
-###1. Modify Group Variables
+### 1. Modify Group Variables
 The group variables for different types of devices are stored in **catalyst_vars.yaml**, **ios_xe_router_vars.yaml** and **generic_ios_vars.yaml**, under the **group_var**s sub-directory:
 
 Make sure to update these variables based on your target upgrade version, image file location, bootflash location, etc. Pay particular attention to the ```ansible_command_timeout``` value for longer tasks like file uploads, especially on slower networks like 4G.
@@ -78,11 +78,11 @@ Key variables include:
 - **tftp_server_ip**          : IP address of the TFTP server.
 
 
-###2. Modify the Inventory (```ansible_hosts```) 
+### 2. Modify the Inventory (```ansible_hosts```) 
 
 Ensure your ```ansible_hosts``` file reflects the devices to be upgraded.
 
-###3. Update Playbooks with Correct Hosts
+### 3. Update Playbooks with Correct Hosts
 
 In each playbook, replace ```hosts: all``` with the appropriate device group or individual host from your ```ansible_hosts``` file.
 
@@ -96,7 +96,7 @@ Example:
     - ../group_vars/catalyst_vars.yaml 
 ```
 
-###4. Test **SSH** Connectivity
+### 4. Test **SSH** Connectivity
 
 Before running any upgrade playbooks, it’s recommended to test the SSH connection from the Ansible host to the target devices by running the **show-version.yaml** playbook.
 ```
@@ -104,11 +104,11 @@ Before running any upgrade playbooks, it’s recommended to test the SSH connect
 ```
 (Use --ask-vault-pass if any of the files are encrypted with ansible-vault.)
 
-###5. Upload the Firmware File
+### 5. Upload the Firmware File
 
 Download the required firmware image and place it in the **images/** directory on your Ansible host. Verify the MD5 checksum of the image before uploading it to the devices.
 
-###6. Execute the Upgrade Playbooks
+### 6. Execute the Upgrade Playbooks
 
 Run the playbooks in sequence:
 ```
