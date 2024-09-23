@@ -1,0 +1,11 @@
+Health Check Report for sw1 - 2024-09-22_19-35-26 | Ready for Upgrade:  NO  | Firmware Upgrade Needed:  YES 
+-----------------------------
+Switch Mode:   INSTALL
+
+Firmware File Existence:  MISSING 
+MD5 Checksum:  FAILED 
+Current Version: 16.12.11
+Target Version: 16.06.09
+
+---------------------------------------------------
+

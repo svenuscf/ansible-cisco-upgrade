@@ -6,5 +6,7 @@ host_key_checking=False
 [ios_xe]
 sw1 
 
-[c1100]
+[ios_xe_routers]
 r1
+
+[ios]
