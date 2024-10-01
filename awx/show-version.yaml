@@ -1,18 +1,23 @@
 ---
-# Ansible Playbook to uploade images to Cisco Devices running IOS XE
-# Show running version
-#
-- name: Display running version on Cisco IOS Devices 
-  tasks:
+# Playbook to display the running version on Cisco IOS Devices
 
+- name: Install cisco.ios collection on localhost
+  hosts: localhost
+  tasks:
     - name: Install cisco.ios collection
       ansible.builtin.ansible_galaxy:
         command: install
         name: cisco.ios
 
-    - name: Display running version
+- name: Display running version on Cisco IOS devices
+  hosts: cisco_devices
+  gather_facts: no
+  tasks:
+    - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
-    - debug:
-        msg:
-        - "Current version is {{ ansible_net_version }}"
+      register: facts
+
+    - name: Display running version
+      debug:
+        msg: "Current version is {{ facts.ansible_net_version }}"
 
