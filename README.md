@@ -109,6 +109,19 @@ Example:
   gather_facts: yes
   vars_files:
     - ../group_vars/catalyst_vars.yaml 
+    - ../group_vars/users.yaml
+```
+
+Note that a **users.yaml** should be placed in the **group_vars** directory to store login credentials to the devices. 
+This file has not been made to Git in consideration of tidyness without hardcoded passwords. 
+
+Example:
+```
+---
+cli:
+  host: "{{ inventory_hostname }}"
+  username: network_admin
+  password: network_password
 ```
 
 ### 4. Test **SSH** Connectivity

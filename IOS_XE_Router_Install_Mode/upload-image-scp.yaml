@@ -6,11 +6,12 @@
 # Upload will utilize SCP and the playbook will mandatorily turn on SCP on the router (without saving)
 #
 - name: Upload images to Cisco IOS XE Routers
-  hosts: c1100
+  hosts: ios_xe_routers
   connection: network_cli
   gather_facts: no
   vars_files:
     - ../group_vars/ios_xe_router_vars.yaml
+    - ../group_vars/users.yaml
 
   tasks:
     - name: Check Current Version

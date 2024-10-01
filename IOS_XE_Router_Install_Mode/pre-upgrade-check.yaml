@@ -1,10 +1,11 @@
 ---
 - name: Health check playbook for upgrade readiness
-  hosts: c1100 
+  hosts: ios_xe_routers
   connection: network_cli
   gather_facts: no
   vars_files:
     - ../group_vars/ios_xe_router_vars.yaml
+    - ../group_vars/users.yaml
 
   tasks:
 

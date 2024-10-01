@@ -5,11 +5,12 @@
 # This playbook works for upgrade from 16.X to 17.X , from INSTALL mode to INSTALL mode
 #
 - name: Activate Cisco IOS XE Routers upgrade via install
-  hosts: c1100
+  hosts: ios_xe_routers
   connection: network_cli
   gather_facts: no
   vars_files:
     - ../group_vars/ios_xe_router_vars.yaml
+    - ../group_vars/users.yaml
 
   tasks:
     - name: Check Current Version
