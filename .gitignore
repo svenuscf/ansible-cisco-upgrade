@@ -2,3 +2,4 @@ venv/
 images/
 networks_automations/
 file_structure.txt
+group_vars/users.yaml

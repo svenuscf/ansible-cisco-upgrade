@@ -9,6 +9,16 @@ These playbooks are used to upgrade Cisco IOS/IOS-XE Devices.
 
 - For Legacy IOS devices that use the "boot system flash" command to point to the firmware file on the flash, use playbooks under the **Legacy_Bundle_Mode** directory.
 
+### Important Notice: Smart Licensing Check
+**WARNING**: Before proceeding with any upgrades, it is crucial to verify the current licensing mode of your devices, especially if you are upgrading to **IOS XE version 16.10.1** or higher.
+
+Cisco introduced **Smart Licensing** in version **16.10.1**. Devices that are still using traditional licensing will require a migration to Smart Licensing as part of the upgrade process.
+
+**Before upgrading**:
+
+Confirm whether the device is currently using **Smart Licensing**.
+If Smart Licensing is not yet configured, ensure that the migration plan is in place.
+Failing to configure Smart Licensing before upgrading may result in licensing issues, which could affect the functionality of the device.
 
 ## File Structure
 ```
@@ -99,6 +109,19 @@ Example:
   gather_facts: yes
   vars_files:
     - ../group_vars/catalyst_vars.yaml 
+    - ../group_vars/users.yaml
+```
+
+Note that a **users.yaml** should be placed in the **group_vars** directory to store login credentials to the devices. 
+This file has not been made to Git in consideration of tidyness without hardcoded passwords. 
+
+Example:
+```
+---
+cli:
+  host: "{{ inventory_hostname }}"
+  username: network_admin
+  password: network_password
 ```
 
 ### 4. Test **SSH** Connectivity

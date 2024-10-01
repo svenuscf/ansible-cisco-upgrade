@@ -7,6 +7,7 @@
   gather_facts: no
   vars_files:
     - group_vars/catalyst_vars.yaml
+    - group_vars/users.yaml
 
   tasks:
     - name: Issue reload command

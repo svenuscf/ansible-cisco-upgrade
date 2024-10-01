@@ -4,11 +4,12 @@
 # This play book cleans up unused firmware package files on the flash
 #
 - name: Cleanup unused firmware package files on Cisco IOS XE Devices
-  hosts: c1100
+  hosts: ios_xe_routers
   connection: network_cli
   gather_facts: no
   vars_files:
     - ../group_vars/ios_xe_router_vars.yaml
+    - ../group_vars/users.yaml
 
   tasks:
     - name: Run "show run | inc boot system" to check if the router is in INSTALL mode

@@ -1,8 +1,4 @@
 ---
-cli:
-  host: "{{ inventory_hostname }}"
-  username: admin
-  password: cisco123
 ansible_network_os: ios
 ansible_command_timeout: 18000
 upgrade_ios_version: 16.09.07
