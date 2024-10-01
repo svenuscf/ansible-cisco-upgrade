@@ -1,0 +1,13 @@
+---
+# Ansible Playbook to uploade images to Cisco Devices running IOS XE
+# Show running version
+#
+- name: Display running version on Cisco IOS Devices 
+
+  tasks:
+    - name: Display running version
+      ios_facts:
+    - debug:
+        msg:
+        - "Current version is {{ ansible_net_version }}"
+
