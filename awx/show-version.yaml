@@ -3,8 +3,13 @@
 # Show running version
 #
 - name: Display running version on Cisco IOS Devices 
-
   tasks:
+
+    - name: Install cisco.ios collection
+      ansible.builtin.ansible_galaxy:
+        command: install
+        name: cisco.ios
+
     - name: Display running version
       cisco.ios.ios_facts:
     - debug:
