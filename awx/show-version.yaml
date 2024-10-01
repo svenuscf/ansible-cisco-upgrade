@@ -1,8 +1,17 @@
 ---
 # Playbook to display the running version on Cisco IOS Devices
 
+- name: Install cisco.ios collection on localhost
+  hosts: localhost
+  tasks:
+    - name: Install cisco.ios collection
+      ansible.builtin.ansible_galaxy:
+        command: install
+        name: cisco.ios
+
 - name: Display running version on Cisco IOS devices
-  gather_facts: False 
+  hosts: all
+  gather_facts: no
   tasks:
     - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
