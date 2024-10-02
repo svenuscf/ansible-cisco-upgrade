@@ -2,6 +2,7 @@
 # Playbook to display the running version on Cisco IOS Devices
 
 - name: Display running version on Cisco IOS devices
+  hosts: all
   gather_facts: false
   tasks:
     - name: Gather facts from Cisco devices
