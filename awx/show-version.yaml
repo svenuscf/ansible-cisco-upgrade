@@ -3,7 +3,7 @@
 
 - name: Display running version on Cisco IOS devices
   hosts: all
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
