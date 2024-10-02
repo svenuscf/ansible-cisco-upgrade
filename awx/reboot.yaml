@@ -1,17 +1,24 @@
-# Ansible Playbook to reboot Cisco IOS XE Devices
-#
 ---
+# Ansible Playbook to reboot Cisco IOS XE Devices
 - name: Reboot Cisco IOS XE Devices
   hosts: all
   gather_facts: no
 
   tasks:
     - name: Issue reload command
-      cli_command:
-        command: reload
-        prompt: 
-          - confirm
-        answer:
-          - y
+      cisco.ios.ios_command:
+        commands: "reload"
       register: reload_output
+
+    - name: Wait for device to become reachable after reboot
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        delay: 60  # Delay in seconds before starting to check
+        timeout: 300  # Total timeout in seconds
+      when: "'confirm' not in reload_output.stdout"
+
+    - name: Display reload output
+      debug:
+        var: reload_output.stdout
 
