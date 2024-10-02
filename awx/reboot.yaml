@@ -1,0 +1,17 @@
+# Ansible Playbook to reboot Cisco IOS XE Devices
+#
+---
+- name: Reboot Cisco IOS XE Devices
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Issue reload command
+      cli_command:
+        command: reload
+        prompt: 
+          - confirm
+        answer:
+          - y
+      register: reload_output
+
