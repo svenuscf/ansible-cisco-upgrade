@@ -9,6 +9,10 @@
       cisco.ios.ios_facts:
       register: facts
 
+    - name: Display all gathered facts
+      debug:
+        var: facts
+
     - name: Display running version
       debug:
         msg: "Current version is {{ facts.ansible_net_version }}"
