@@ -7,16 +7,8 @@
   tasks:
     - name: Issue reload command
       cisco.ios.ios_command:
-        commands: "reload"
+        commands: "reload in 0"
       register: reload_output
-
-    - name: Wait for device to become reachable after reboot
-      wait_for:
-        host: "{{ inventory_hostname }}"
-        port: 22
-        delay: 60  # Delay in seconds before starting to check
-        timeout: 300  # Total timeout in seconds
-      when: "'confirm' not in reload_output.stdout"
 
     - name: Display reload output
       debug:
