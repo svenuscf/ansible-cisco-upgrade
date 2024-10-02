@@ -15,5 +15,5 @@
 
     - name: Display running version
       debug:
-        msg: "Current version is {{ facts.ansible_net_version }}"
+        msg: "Current version is {{ facts.ansible_facts.ansible_net_version }}"
 
