@@ -5,9 +5,9 @@
   gather_facts: no
 
   tasks:
-    - name: Issue reload command
+    - name: Issue reload EEM script
       cisco.ios.ios_command:
-        commands: "reload in 0"
+        commands: "event manager run REBOOT"
       register: reload_output
 
     - name: Display reload output
