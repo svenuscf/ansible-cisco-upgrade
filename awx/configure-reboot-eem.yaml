@@ -29,7 +29,7 @@
           - no event manager applet REBOOT
       when: eem_exist 
 
-    - name: Configure the EEM script by first removing the existing one 
+    - name: Configure the actual EEM script 
       cisco.ios.ios_config:
         lines:
           - event manager applet REBOOT authorization bypass
