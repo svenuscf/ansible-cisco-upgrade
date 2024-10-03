@@ -33,8 +33,8 @@
           - action 0002 cli command "term length 0"
           - action 0010 cli command "reload" pattern "confirm"
           - action 0020 cli command "y"
+        save_when: always
       when: eem_exist 
-      save_when: always
         
     - name: Configure the EEM script by first removing the existing one 
       cisco.ios.ios_config:
@@ -44,5 +44,5 @@
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
           - action 0010 cli command "reload" pattern "confirm"
+        save_when: always
       when: not eem_exist 
-      save_when: always
