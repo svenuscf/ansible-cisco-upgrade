@@ -7,7 +7,7 @@
   tasks:
 
     # Task 1: Check whether the device has the same EEM script defined
-    - name: Run "show run | inc event.*REBOOT" to check if the switch is in INSTALL mode
+    - name: Run "show run | inc event.*REBOOT" to check if the device has already been configured with a reboot EEM script
       cisco.ios.ios_command:
         commands:
           - "show run | inc event.*REBOOT"
