@@ -1,0 +1,27 @@
+---
+# Playbook to print inventory and group variables
+- name: Print inventory and group variables in AWX
+  hosts: all
+  gather_facts: false
+  tasks:
+
+    # Print inventory hostname
+    - name: Print inventory hostname
+      debug:
+        msg: "Inventory Hostname: {{ inventory_hostname }}"
+
+    # Print ansible_host variable (usually set in inventory)
+    - name: Print ansible_host (IP or hostname of the target)
+      debug:
+        msg: "Ansible Host: {{ ansible_host }}"
+
+    # Print another group or inventory variable (example: device_storage)
+    - name: Print group variable 'device_storage'
+      debug:
+        msg: "Group Variable - device_storage: {{ device_storage }}"
+
+    # Print all variables available for the host
+    - name: Print all host variables
+      debug:
+        var: hostvars[inventory_hostname]
+
