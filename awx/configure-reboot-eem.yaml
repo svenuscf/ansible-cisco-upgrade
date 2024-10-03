@@ -1,7 +1,7 @@
 ---
 # Playbook to configure a reboot EEM on Cisco devices so that interactive prompt is handled by EEM scripts
 
-- name: Display running version on Cisco IOS devices
+- name: Deploy reboot EEM script to bypass interactive prompt
   hosts: all
   gather_facts: false
   tasks:
@@ -27,15 +27,8 @@
       cisco.ios.ios_config:
         lines:
           - no event manager applet REBOOT
-          - event manager applet REBOOT authorization bypass
-          - event none
-          - action 0001 cli command "enable"
-          - action 0002 cli command "term length 0"
-          - action 0010 cli command "reload" pattern "confirm"
-          - action 0020 cli command "y"
-        save_when: always
       when: eem_exist 
-        
+
     - name: Configure the EEM script by first removing the existing one 
       cisco.ios.ios_config:
         lines:
@@ -45,4 +38,3 @@
           - action 0002 cli command "term length 0"
           - action 0010 cli command "reload" pattern "confirm"
         save_when: always
-      when: not eem_exist 
