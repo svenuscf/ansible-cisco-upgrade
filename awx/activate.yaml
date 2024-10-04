@@ -29,20 +29,38 @@
         msg: "Device is already running the latest {{ target_version }} version. Upgrade procedure stops."
       when:
         - facts.ansible_facts.ansible_net_version == target_version
+
+    - name: Assign device_storage variable
+      set_fact:
+        device_type: "{{ ('router' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'switch') | trim }}"
       
-    - name: Run "show version" to check if the switch is in INSTALL mode
+    - name: Run "show version" to check if the device is in INSTALL mode
       cisco.ios.ios_command:
         commands:
           - show version
       register: version_output
+      when: device_type == 'switch'
 
     - name: Parse "show version" output for INSTALL mode
       set_fact:
         in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
+      when: device_type == 'switch'
 
-    - name: Display whether the switch is in INSTALL mode
+    - name: Run "show run | inc boot" to check if the device is in INSTALL mode
+      cisco.ios.ios_command:
+        commands:
+          - show version
+      register: version_output
+      when: device_type == 'router'
+
+    - name: Parse "show run | inc boot" output for INSTALL mode
+      set_fact:
+        in_install_mode: "{{ 'packages.conf' in version_output.stdout[0] }}"
+      when: device_type == 'router'
+
+    - name: Display whether the device is in INSTALL mode
       debug:
-        msg: "The switch is in INSTALL mode: {{ in_install_mode }}"
+        msg: "The device is in INSTALL mode: {{ in_install_mode }}"
 
     - name: Assign device_storage variable
       set_fact:

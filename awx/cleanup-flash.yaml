@@ -9,15 +9,37 @@
 
   tasks:
   # Task 1: Perform quick check
+  - name: Gather facts from Cisco devices
+    cisco.ios.ios_facts:
+    register: facts
+
+  - name: Assign device_type variable based on booting images setting
+    set_fact:
+      device_type: "{{ ('router' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'switch') | trim }}"
+
   - name: Run "show version" to check if the device is in INSTALL mode
     cisco.ios.ios_command:
       commands:
         - show version
     register: version_output
+    when: device_type == 'switch'
 
   - name: Parse "show version" output for INSTALL mode
     set_fact:
       in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
+    when: device_type == 'switch'
+
+  - name: Run "show run | inc boot" to check if the device is in INSTALL mode
+    cisco.ios.ios_command:
+      commands:
+        - show version
+    register: version_output
+    when: device_type == 'router'
+
+  - name: Parse "show run | inc boot" output for INSTALL mode
+    set_fact:
+      in_install_mode: "{{ 'packages.conf' in version_output.stdout[0] }}"
+    when: device_type == 'router'
 
   - name: Display whether the device is in INSTALL mode
     debug:
