@@ -73,7 +73,7 @@
           - event none maxrun {{ command_timeout }}
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
-          - action 0010 cli command "copy tftp://{{ tftp_server_ip }}/{{ path }}/{{ upgrade_filename }} {{ device_storage }}{{ upgrade_filename }}" pattern "\\?"
+          - action 0010 cli command "copy tftp://{{ tftp_server_ip }}{{ path }}/{{ upgrade_filename }} {{ device_storage }}{{ upgrade_filename }}" pattern "Destination"
           - action 0020 cli command "\r" 
 
     - name: Run the EEM script to perform upload 
