@@ -16,11 +16,7 @@
     - name: Assign device_storage variable
       set_fact:
         device_storage: >
-          {% if 'bootflash:' in facts.ansible_facts.ansible_net_image %}
-            bootflash:
-          {% else %}
-            flash:
-          {% endif %}
+          {{ 'bootflash:' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'flash:' }}
 
     # Print inventory hostname
     - name: Print inventory hostname
