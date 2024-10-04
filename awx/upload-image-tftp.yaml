@@ -55,6 +55,11 @@
           {% endif %}
 
     # Task 2: Configure the EEM scripts
+
+    - name: Ensure command_timeout is an integer
+      set_fact:
+        command_timeout: "{{ command_timeout | int }}"
+
     - name: Configure the EEM script by first removing the existing one 
       cisco.ios.ios_config:
         lines:
