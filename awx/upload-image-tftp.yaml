@@ -82,7 +82,7 @@
       vars:
         ansible_command_timeout: "{{ command_timeout }}"
 
-          #    - name: Run the EEM script to perform upload 
-          # cisco.ios.ios_config:
-          #lines: 
-          # - no event manager applet UPLOAD
+    - name: Run the EEM script to perform upload 
+        cisco.ios.ios_config:
+          lines: 
+            - no event manager applet UPLOAD
