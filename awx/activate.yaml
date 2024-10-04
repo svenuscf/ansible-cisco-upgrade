@@ -5,6 +5,23 @@
   gather_facts: false
   tasks:
 
+    - name: Gather facts from Cisco devices
+      cisco.ios.ios_facts:
+      register: facts
+
+    - name: Display running version
+      debug:
+        msg: "Current version is {{ facts.ansible_facts.ansible_net_version }}"
+
+    - name: Assign device_storage variable
+      set_fact:
+        device_storage: >
+          {% if 'bootflash:' in facts.ansible_facts.ansible_net_image %}
+            bootflash:
+          {% else %}
+            flash:
+          {% endif %}
+
     # Print inventory hostname
     - name: Print inventory hostname
       debug:
