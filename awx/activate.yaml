@@ -1,11 +1,11 @@
+---
+# Playbook to print inventory and group variables
 #
 # Defined variables in survey:
 #
 # target_version - firmware version to be upgraded to
 # upgrade_filename - filename of the firmware 
 #
----
-# Playbook to print inventory and group variables
 - name: Print inventory and group variables in AWX
   hosts: all
   gather_facts: false

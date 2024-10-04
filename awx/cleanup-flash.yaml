@@ -1,0 +1,65 @@
+---
+# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+#
+# This play book cleans up unused firmware package files on the flash
+#
+- name: Cleanup unused firmware package files on Cisco IOS XE Switches
+  hosts: all
+  gather_facts: false
+
+  tasks:
+  # Task 1: Perform quick check
+  - name: Run "show version" to check if the switch is in INSTALL mode
+    cisco.ios.ios_command:
+      commands:
+        - show version
+    register: version_output
+
+  - name: Parse "show version" output for INSTALL mode
+    set_fact:
+      in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
+
+  - name: Display whether the switch is in INSTALL mode
+    debug:
+      msg: "The switch is in INSTALL mode: {{ in_install_mode }}"
+
+  - name: Fail if the switch is not in INSTALL mode
+    fail:
+      msg: "The switch is not in INSTALL mode. Operation cannot be proceeded."
+    when: in_install_mode == False
+
+    - name: Determine the if a CLEANUP script exists
+      set_fact:
+        eem_exist: >
+          {% if 'CLEANUP' in version_output.stdout[0] %}
+            true
+          {% else %}
+            false
+          {% endif %}
+
+    # Task 2: Configure the EEM scripts
+    - name: Configure the EEM script by first removing the existing one 
+      cisco.ios.ios_config:
+        lines:
+          - no event manager applet CLEANUP
+      when: eem_exist 
+
+    - name: Configure the actual EEM script 
+      cisco.ios.ios_config:
+        lines:
+          - event manager applet CLEANUP authorization bypass
+          - event none maxrun 300
+          - action 0001 cli command "enable"
+          - action 0002 cli command "term length 0"
+          - action 0010 cli command "install remove inactive" pattern "above files"
+          - action 0020 cli command "y" 
+        save_when: always
+
+    - name: Issue cleanup EEM script
+      cisco.ios.ios_command:
+        commands: "event manager run CLEANUP"
+      register: cleanup_output
+
+    - name: Display reload output
+      debug:
+        var: cleanup_output.stdout
