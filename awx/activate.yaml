@@ -42,7 +42,7 @@
 
     - name: Assign the device path and file for checking
       set_fact:
-        device_file: "{{ device_storage }}:{{ upgrade_filename }}"
+        device_file: "{{ device_storage }}{{ upgrade_filename }}"
 
     - block:
         # Task 1: Check if the file exists
