@@ -1,15 +1,15 @@
 ---
-# Ansible Playbook to uploade images to Cisco Switches running IOS XE
+# Ansible Playbook to uploade images to Cisco devices running IOS XE
 #
 # This play book cleans up unused firmware package files on the flash
 #
-- name: Cleanup unused firmware package files on Cisco IOS XE Switches
+- name: Cleanup unused firmware package files on Cisco IOS XE devices 
   hosts: all
   gather_facts: false
 
   tasks:
   # Task 1: Perform quick check
-  - name: Run "show version" to check if the switch is in INSTALL mode
+  - name: Run "show version" to check if the device is in INSTALL mode
     cisco.ios.ios_command:
       commands:
         - show version
@@ -19,13 +19,13 @@
     set_fact:
       in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
 
-  - name: Display whether the switch is in INSTALL mode
+  - name: Display whether the device is in INSTALL mode
     debug:
-      msg: "The switch is in INSTALL mode: {{ in_install_mode }}"
+      msg: "The device is in INSTALL mode: {{ in_install_mode }}"
 
-  - name: Fail if the switch is not in INSTALL mode
+  - name: Fail if the device is not in INSTALL mode
     fail:
-      msg: "The switch is not in INSTALL mode. Operation cannot be proceeded."
+      msg: "The device is not in INSTALL mode. Operation cannot be proceeded."
     when: in_install_mode == False
 
   - name: Determine the if a CLEANUP script exists
@@ -37,7 +37,7 @@
           false
         {% endif %}
 
-    # Task 2: Configure the EEM scripts
+  # Task 2: Configure the EEM scripts
   - name: Configure the EEM script by first removing the existing one 
     cisco.ios.ios_config:
       lines:
@@ -51,7 +51,7 @@
         - event none maxrun 300
         - action 0001 cli command "enable"
         - action 0002 cli command "term length 0"
-        - action 0010 cli command "install remove inactive" pattern "above files"
+        - action 0010 cli command "install remove inactive" pattern "Do you want to remove the above files"
         - action 0020 cli command "y" 
       save_when: always
 
