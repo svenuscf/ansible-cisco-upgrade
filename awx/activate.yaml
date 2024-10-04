@@ -1,7 +1,9 @@
 #
 # Defined variables in survey:
-# target_version
-# upgrade_filename
+#
+# target_version - firmware version to be upgraded to
+# upgrade_filename - filename of the firmware 
+#
 ---
 # Playbook to print inventory and group variables
 - name: Print inventory and group variables in AWX
@@ -22,6 +24,12 @@
       debug:
         msg: "Target version is {{ target_version }}"
 
+    - name: Stop following tasks if the device does not need to upgrade
+      fail:
+        msg: "Device is already running the latest {{ target_version }} version. Upgrade procedure stops."
+      when:
+        - facts.ansible_facts.ansible_net_version == target_version
+      
     - name: Run "show version" to check if the switch is in INSTALL mode
       cisco.ios.ios_command:
         commands:
