@@ -26,7 +26,7 @@
       set_fact:
         in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
 
-    - name: Display whether the switch is in INSTALL mode: true or false
+    - name: Display whether the switch is in INSTALL mode
       debug:
         msg: "The switch is in INSTALL mode: {{ in_install_mode }}"
 
