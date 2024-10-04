@@ -18,7 +18,7 @@
         
     - name: Display filesystem information
       debug:
-        var: facts.ansible_facts.ansible_net_filesystems_info
+        var: facts
 
     - name: Set free space variable for flash
       set_fact:
