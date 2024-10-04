@@ -58,7 +58,6 @@
   - name: Issue cleanup EEM script
     cisco.ios.ios_command:
       commands: "event manager run CLEANUP"
-      wait_for: "SUCCESS"
     register: cleanup_output
 
   - name: Display reload output
