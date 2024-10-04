@@ -24,7 +24,7 @@
 
     - name: Set free space variable for flash
       set_fact:
-        free_space: "{{ facts.ansible_facts.ansible_net_filesystems_info['{{ device_storage }}']['spacefree_kb'] }}"
+        free_space: "{{ facts.ansible_facts.ansible_net_filesystems_info[device_storage]['spacefree_kb'] }}"
 
     - name: Check if the device has enough space for the new image file
       assert:
