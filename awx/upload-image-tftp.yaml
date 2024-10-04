@@ -1,0 +1,43 @@
+---
+# Ansible Playbook to uploade images to Cisco devices 
+# Check available space and quit if failed
+# Playbook will also check if the file already exists on the switch before uploading
+- name: Upload images to Cisco devices 
+  hosts: all
+  gather_facts: false
+
+  tasks:
+  # Task 1: Perform quick check
+    - name: Gather facts from Cisco devices
+      cisco.ios.ios_facts:
+      register: facts
+
+    - name: Assign storage variable based on booting images setting
+      set_fact:
+        device_storage: "{{ ('bootflash:' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'flash:') | trim }}"
+        
+    - name: Display filesystem information
+      debug:
+        var: facts.ansible_facts.ansible_net_filesystems_info
+
+    - name: Set free space variable for flash
+      set_fact:
+        free_space: "{{ facts.ansible_facts.ansible_net_filesystems_info['{{ device_storage }}']['spacefree_kb'] }}"
+
+    - name: Check if the device has enough space for the new image file
+      assert:
+        that:
+          - ( {{ file_size_kb }} | int) < (free_space | int)
+        fail_msg: "Not enough space on the device! Please clean up before continue."
+        success_msg: "Free space is available. Continue to upload image."
+
+# Check if the new image file already exists on the router
+
+#    - name: Upload file from TFTP server to bootflash
+#      cli_command:
+#        command: "copy tftp://{{ tftp_server_ip }}/{{ upgrade_file }} {{ router_file }}"
+#        prompt: 
+#          - "\\?" 
+#        answer:
+#          - "\r"
+#      register: copy_result
