@@ -1,3 +1,7 @@
+#
+# Defined variables in survey:
+# target_version
+# upgrade_filename
 ---
 # Playbook to print inventory and group variables
 - name: Print inventory and group variables in AWX
@@ -5,6 +9,7 @@
   gather_facts: false
   tasks:
 
+    # Task 1: Gather necessary facts
     - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
       register: facts
@@ -17,9 +22,45 @@
       debug:
         msg: "Target version is {{ target_version }}"
 
+    - name: Parse "show version" output for INSTALL mode
+      set_fact:
+        in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
+
+    - name: Display whether the switch is in INSTALL mode: true or false
+      debug:
+        msg: "The switch is in INSTALL mode: {{ in_install_mode }}"
+
     - name: Assign device_storage variable
       set_fact:
         device_storage: "{{ ('bootflash:' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'flash:') | trim }}"
+
+    - name: Assign the device path and file for checking
+      set_fact:
+        device_file: "{{ device_storage }}:{{ upgrade_filename }}"
+
+    - block:
+        # Task 1: Check if the file exists
+        - name: Check if the file exists on the device
+          cisco.ios.ios_command:
+            commands: "dir {{ device_file }}"
+          register: file_check
+          ignore_errors: no  # Don't ignore errors here; use rescue to catch errors.
+
+        # Task 2: Parse the file check result
+        - name: Parse the file check result
+          set_fact:
+            file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
+
+      rescue:
+        # Error handling: when `dir` command fails (e.g., command not found)
+        - name: Print error message
+          debug:
+            msg: "Error: File does not exist on host {{ inventory_hostname }}. Stopping upgrade procedure."
+
+        # Stop all remaining tasks for this host
+        - name: Fail the task and stop further tasks for this host
+          fail:
+            msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
 
     # Print inventory hostname
     - name: Print inventory hostname
