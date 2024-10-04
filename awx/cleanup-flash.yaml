@@ -50,10 +50,16 @@
       msg: "The device is not in INSTALL mode. Operation cannot be proceeded."
     when: in_install_mode == False
 
+  - name: Run "show run | inc event.*CLEANUP" to check if the device has already been configured with a cleanup EEM script
+    cisco.ios.ios_command:
+      commands:
+        - "show run | inc event.*CLEANUP"
+    register: cleanup_output
+
   - name: Determine the if a CLEANUP script exists
     set_fact:
       eem_exist: >
-        {% if 'CLEANUP' in version_output.stdout[0] %}
+        {% if 'CLEANUP' in cleanup_output.stdout[0] %}
           true
         {% else %}
           false
