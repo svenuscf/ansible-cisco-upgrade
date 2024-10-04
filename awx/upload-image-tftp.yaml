@@ -14,9 +14,13 @@
           - hardware
       register: facts
 
-    - name: Assign storage variable based on booting images setting
+    - name: Set device storage based on booting images setting
       set_fact:
-        device_storage: "{{ facts.ansible_facts.ansible_net_filesystems }}"
+        device_storage: "{{ facts.ansible_facts.ansible_net_filesystems[0] }}"
+
+          #- name: Assign storage variable based on booting images setting
+          #set_fact:
+          #device_storage: "{{ facts.ansible_facts.ansible_net_filesystems }}"
         
     - name: Display filesystem information
       debug:
