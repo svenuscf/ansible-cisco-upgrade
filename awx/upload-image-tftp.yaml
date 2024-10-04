@@ -10,6 +10,8 @@
   # Task 1: Perform quick check
     - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
+        gather_subset:
+          - hardware
       register: facts
 
     - name: Assign storage variable based on booting images setting
