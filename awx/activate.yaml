@@ -5,17 +5,6 @@
   gather_facts: false
   tasks:
 
-    - name: Set device storage based on group
-      set_fact:
-        device_storage: >
-          {% if inventory_hostname in groups['Router'] %}
-            "bootflash:"
-          {% elif inventory_hostname in groups['Switch'] %}
-            "flash:"
-          {% else %}
-            "flash:"
-          {% endif %}
-
     # Print inventory hostname
     - name: Print inventory hostname
       debug:
