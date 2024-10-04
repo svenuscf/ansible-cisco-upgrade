@@ -58,6 +58,8 @@
   - name: Issue cleanup EEM script
     cisco.ios.ios_command:
       commands: "event manager run CLEANUP"
+    vars:
+      ansible_command_timeout: 300
     register: cleanup_output
 
   - name: Display reload output
