@@ -14,6 +14,8 @@
     # Task 1: Gather necessary facts
     - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
+        gather_subset:
+          - hardware
       register: facts
 
     - name: Display running version
@@ -64,7 +66,7 @@
 
     - name: Assign device_storage variable
       set_fact:
-        device_storage: "{{ ('bootflash:' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'flash:') | trim }}"
+        device_storage: "{{ facts.ansible_facts.ansible_net_filesystems }}"
 
     - name: Assign the device path and file for checking
       set_fact:

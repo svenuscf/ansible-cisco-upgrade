@@ -16,7 +16,7 @@
 
     - name: Assign storage variable based on booting images setting
       set_fact:
-        device_storage: "{{ ('bootflash:' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'flash:') | trim }}"
+        device_storage: "{{ facts.ansible_facts.ansible_net_filesystems }}"
         
     - name: Display filesystem information
       debug:
