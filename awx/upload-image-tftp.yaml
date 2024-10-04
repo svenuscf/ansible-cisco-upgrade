@@ -33,7 +33,7 @@
     - name: Check if the device has enough space for the new image file
       assert:
         that:
-          - ( {{ file_size_kb }} | int) < (free_space | int)
+          - ( file_size_kb | int) < (free_space | int)
         fail_msg: "Not enough space on the device! Please clean up before continue."
         success_msg: "Free space is available. Continue to upload image."
 
