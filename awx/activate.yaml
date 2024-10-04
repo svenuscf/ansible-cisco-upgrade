@@ -13,6 +13,10 @@
       debug:
         msg: "Current version is {{ facts.ansible_facts.ansible_net_version }}"
 
+    - name: Display target version captured from survey
+      debug:
+        msg: "Target version is {{ target_version }}"
+
     - name: Assign device_storage variable
       set_fact:
         device_storage: "{{ ('bootflash:' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'flash:') | trim }}"
