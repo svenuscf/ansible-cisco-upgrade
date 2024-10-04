@@ -22,6 +22,12 @@
       debug:
         msg: "Target version is {{ target_version }}"
 
+    - name: Run "show version" to check if the switch is in INSTALL mode
+      cisco.ios.ios_command:
+        commands:
+          - show version
+      register: version_output
+
     - name: Parse "show version" output for INSTALL mode
       set_fact:
         in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
