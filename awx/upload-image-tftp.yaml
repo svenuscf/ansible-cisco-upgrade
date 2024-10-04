@@ -1,13 +1,13 @@
 ---
 # Ansible Playbook to uploade images to Cisco devices 
 # Check available space and quit if failed
-# Playbook will also check if the file already exists on the switch before uploading
+# 
 - name: Upload images to Cisco devices 
   hosts: all
   gather_facts: false
 
   tasks:
-  # Task 1: Perform quick check
+  # Task 1: Perform check on available free space
     - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
         gather_subset:
@@ -38,12 +38,46 @@
         success_msg: "Free space is available. Continue to upload image."
 
 # Check if the new image file already exists on the router
+# Task 2: Create EEM scripts to upload file
+    - name: Run "show run | inc event.*UPLOAD" to check if the device has already been configured with a upload EEM script
+      cisco.ios.ios_command:
+        commands:
+          - "show run | inc event.*UPLOAD"
+      register: upload_output
 
-#    - name: Upload file from TFTP server to bootflash
-#      cli_command:
-#        command: "copy tftp://{{ tftp_server_ip }}/{{ upgrade_file }} {{ router_file }}"
-#        prompt: 
-#          - "\\?" 
-#        answer:
-#          - "\r"
-#      register: copy_result
+    - name: Determine the if a UPLOAD script exists
+      set_fact:
+        eem_exist: >
+          {% if 'UPLOAD' in upload_output.stdout[0] %}
+            true
+          {% else %}
+            false
+          {% endif %}
+
+    # Task 2: Configure the EEM scripts
+    - name: Configure the EEM script by first removing the existing one 
+      cisco.ios.ios_config:
+        lines:
+          - no event manager applet UPLOAD
+      when: eem_exist 
+
+    - name: Configure the actual EEM script 
+      cisco.ios.ios_config:
+        lines:
+          - event manager applet UPLOAD authorization bypass
+          - event none maxrun "{{ command_timeout }}"
+          - action 0001 cli command "enable"
+          - action 0002 cli command "term length 0"
+          - action 0010 cli command "copy tftp://{{ tftp_server_ip }}/{{ path }}/{{ upgrade_filename }} {{ device_storage }}{{ upgrade_filename }}" pattern "\\?"
+          - action 0020 cli command "\r" 
+
+    - name: Run the EEM script to perform upload 
+      cisco.ios.ios_command:
+        commands: "event manager run UPLOAD"
+      vars:
+        ansible_command_timeout: command_timeout 
+
+    - name: Run the EEM script to perform upload 
+      cisco.ios.ios_config:
+        lines: 
+           - no event manager applet UPLOAD
