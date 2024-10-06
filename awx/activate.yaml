@@ -5,6 +5,7 @@
 #
 # target_version - firmware version to be upgraded to
 # upgrade_filename - filename of the firmware 
+# md5_checksum - MD5 checksum of the image file
 #
 - name: Print inventory and group variables in AWX
   hosts: all
@@ -101,14 +102,26 @@
     - name: Verify MD5 checksum of the uploaded file
       cli_command:
         command: "verify /md5 {{ device_file }}"
-      register: md5_check
+      register: checksum_output
       ignore_errors: yes
       changed_when: false
+
+    - name: Flatten the stdout lines to handle multi-line output
+      set_fact:
+        flat_output: "{{ checksum_output.stdout_lines | flatten }}"
+
+    - name: Extract the checksum from the output
+      set_fact:
+        file_checksum: "{{ flat_output | select ('search', 'verify /md5') | first | regex_search('=\\s*(\\w+)', '\\1') }}" 
+
+    - name: Convert the checksum from list to string (if necessary)
+      set_fact:
+        file_checksum: "{{ file_checksum[0] if file_checksum is iterable else file_checksum }}"
 
     - name: Log MD5 checksum status
       debug:
         msg: >
-          {% if file_md5sum != file_checksum %}
+          {% if md5_checksum != file_checksum %}
             MD5 checksum for {{ upgrade_filename }} does not match! File might be corrupted.
           {% else %}
             MD5 checksum for {{ upgrade_filename }} matches. File is valid.
