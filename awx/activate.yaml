@@ -73,14 +73,14 @@
         device_file: "{{ device_storage }}{{ upgrade_filename }}"
 
     - block:
-        # Task 1: Check if the file exists
+        # Task 2a: Check if the file exists
         - name: Check if the file exists on the device
           cisco.ios.ios_command:
             commands: "dir {{ device_file }}"
           register: file_check
           ignore_errors: no  # Don't ignore errors here; use rescue to catch errors.
 
-        # Task 2: Parse the file check result
+        # Task 2b: Parse the file check result
         - name: Parse the file check result
           set_fact:
             file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
@@ -96,23 +96,25 @@
           fail:
             msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
 
-    # Print inventory hostname
-    - name: Print inventory hostname
-      debug:
-        msg: "Inventory Hostname: {{ inventory_hostname }}"
 
-    # Print ansible_host variable (usually set in inventory)
-    - name: Print ansible_host (IP or hostname of the target)
-      debug:
-        msg: "Ansible Host: {{ ansible_host }}"
+    # Task 3: Check md5 checksum on the device against the input from template survey
+    - name: Verify MD5 checksum of the uploaded file
+      cli_command:
+        command: "verify /md5 {{ device_file }}"
+      register: md5_check
+      ignore_errors: yes
+      changed_when: false
 
-    # Print another group or inventory variable (example: device_storage)
-    - name: Print group variable 'device_storage'
+    - name: Log MD5 checksum status
       debug:
-        msg: "Group Variable - device_storage: {{ device_storage }}"
+        msg: >
+          {% if file_md5sum != file_checksum %}
+            MD5 checksum for {{ upgrade_filename }} does not match! File might be corrupted.
+          {% else %}
+            MD5 checksum for {{ upgrade_filename }} matches. File is valid.
+          {% endif %}
 
-    # Print all variables available for the host
-    - name: Print all host variables
-      debug:
-        var: hostvars[inventory_hostname]
-
+    # Stop all remaining tasks for this host
+    - name: Fail the task and stop further tasks for this host
+      fail:
+        msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
