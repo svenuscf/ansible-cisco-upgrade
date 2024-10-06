@@ -130,4 +130,5 @@
     # Stop all remaining tasks for this host
     - name: Fail the task and stop further tasks for this host
       fail:
-        msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
+        msg: "Stopping further tasks on host {{ inventory_hostname }} due to firmware is corrupted."
+      when: md5_checksum != file_checksum
