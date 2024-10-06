@@ -169,10 +169,10 @@
           - event none maxrun {{ command_timeout }}
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
-          - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "y\/n"
+          - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "This operation requires a reload"
           - action 0020 cli command "y" 
 
-    - name: Run the EEM script to perform upload 
+    - name: Run the EEM script to perform upgrade
       cisco.ios.ios_command:
         commands: "event manager run UPGRADE"
       vars:
