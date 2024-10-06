@@ -162,6 +162,7 @@
           - no event manager applet UPGRADE
       when: eem_exist 
 
+    # Note that the prompt will change if the running configuration is not saved.  Therefore the EEM script mandates to save the configuration before activating the new firmware.
     - name: Configure the actual EEM script 
       cisco.ios.ios_config:
         lines:
@@ -169,6 +170,7 @@
           - event none maxrun {{ command_timeout }}
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
+          - action 0005 cli command "wr" 
           - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "This operation requires a reload"
           - action 0020 cli command "y" 
 
