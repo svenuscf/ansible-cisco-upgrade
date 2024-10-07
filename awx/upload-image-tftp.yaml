@@ -8,8 +8,8 @@
 # file_size_kb - File size in kilo Bytes
 # command_timeout - Timeout for ansible command execution. Configure to allow long upload time (in seconds)
 # transfer_mode - TFTP or SCP
-# tftp_server_ip - TFTP server IP address
-# path - Path in TFTP server storing firmware file
+# server_ip - TFTP or SCP server IP address
+# path - Path in TFTP/SCP server storing firmware file
 # scp_username - Username used to login SCP server. Not used in TFTP.
 # scp_password - Password used to login SCP server (encrypted). Not used in TFTP.
 # 
@@ -84,7 +84,7 @@
           - event none maxrun {{ command_timeout }}
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
-          - action 0010 cli command "copy tftp://{{ tftp_server_ip }}{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
+          - action 0010 cli command "copy tftp://{{ server_ip }}{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
           - action 0020 cli command "{{ upgrade_filename }}" 
       when: transfer_mode == "TFTP"
 
@@ -95,7 +95,7 @@
           - event none maxrun {{ command_timeout }}
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
-          - action 0010 cli command "copy scp://{{ scp_username }}@{{ tftp_server_ip }}/{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
+          - action 0010 cli command "copy scp://{{ scp_username }}@{{ server_ip }}/{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
           - action 0020 cli command "{{ upgrade_filename }}" pattern "Password"
           - action 0030 cli command "{{ scp_password }}"
       when: transfer_mode == "SCP"
