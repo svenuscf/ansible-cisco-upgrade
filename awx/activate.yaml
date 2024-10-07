@@ -174,7 +174,7 @@
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
           - action 0005 cli command "wr" 
-          - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "This operation requires a reload"
+          - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "This operation" 
           - action 0020 cli command "y" 
 
     - name: Run the EEM script to perform upgrade
