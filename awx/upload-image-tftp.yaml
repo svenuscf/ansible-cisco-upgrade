@@ -6,9 +6,12 @@
 #
 # upgrade_filename - Firmware filename to be uploaded
 # file_size_kb - File size in kilo Bytes
+# command_timeout - Timeout for ansible command execution. Configure to allow long upload time (in seconds)
+# transfer_mode - TFTP or SCP
 # tftp_server_ip - TFTP server IP address
 # path - Path in TFTP server storing firmware file
-# command_timeout - Timeout for ansible command execution. Configure to allow long upload time (in seconds)
+# scp_username - Username used to login SCP server. Not used in TFTP.
+# scp_password - Password used to login SCP server (encrypted). Not used in TFTP.
 # 
 - name: Upload images to Cisco devices 
   hosts: all
@@ -74,7 +77,7 @@
           - no event manager applet UPLOAD
       when: eem_exist 
 
-    - name: Configure the actual EEM script 
+    - name: Configure the actual EEM script for TFTP
       cisco.ios.ios_config:
         lines:
           - event manager applet UPLOAD authorization bypass
@@ -83,6 +86,19 @@
           - action 0002 cli command "term length 0"
           - action 0010 cli command "copy tftp://{{ tftp_server_ip }}{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
           - action 0020 cli command "{{ upgrade_filename }}" 
+      when: transfer_mode == "TFTP"
+
+    - name: Configure the actual EEM script for SCP
+      cisco.ios.ios_config:
+        lines:
+          - event manager applet UPLOAD authorization bypass
+          - event none maxrun {{ command_timeout }}
+          - action 0001 cli command "enable"
+          - action 0002 cli command "term length 0"
+          - action 0010 cli command "copy scp://{{ scp_username }}@{{ tftp_server_ip }}/{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
+          - action 0020 cli command "{{ upgrade_filename }}" pattern "Password"
+          - action 0030 cli command "{{ scp_password }}"
+      when: transfer_mode == "SCP"
 
     - name: Run the EEM script to perform upload 
       cisco.ios.ios_command:
