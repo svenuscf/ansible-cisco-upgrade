@@ -5,13 +5,15 @@
 #
 # target_version - firmware version to be upgraded to
 # upgrade_filename - filename of the firmware 
+# md5_checksum - MD5 checksum of the image file
+# command_timeout - Set ansible command timeout
 #
 - name: Print inventory and group variables in AWX
   hosts: all
   gather_facts: false
   tasks:
 
-    # Task 1: Gather necessary facts
+# Task 1: Gather necessary facts
     - name: Gather facts from Cisco devices
       cisco.ios.ios_facts:
         gather_subset:
@@ -77,14 +79,14 @@
         device_file: "{{ device_storage }}{{ upgrade_filename }}"
 
     - block:
-        # Task 3: Check if the file exists
+    # Task 3: Check if the file exists
         - name: Check if the file exists on the device
           cisco.ios.ios_command:
             commands: "dir {{ device_file }}"
           register: file_check
           ignore_errors: no  # Don't ignore errors here; use rescue to catch errors.
 
-        # Task 4: Parse the file check result
+    # Task 4: Parse the file check result
         - name: Parse the file check result
           set_fact:
             file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
@@ -100,3 +102,83 @@
           fail:
             msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
 
+# Task 5: Check md5 checksum on the device against the input from template survey
+    - name: Verify MD5 checksum of the uploaded file
+      cli_command:
+        command: "verify /md5 {{ device_file }}"
+      register: checksum_output
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Flatten the stdout lines to handle multi-line output
+      set_fact:
+        flat_output: "{{ checksum_output.stdout_lines | flatten }}"
+
+    - name: Extract the checksum from the output
+      set_fact:
+        file_checksum: "{{ flat_output | select ('search', 'verify /md5') | first | regex_search('=\\s*(\\w+)', '\\1') }}" 
+
+    - name: Convert the checksum from list to string (if necessary)
+      set_fact:
+        file_checksum: "{{ file_checksum[0] if file_checksum is iterable else file_checksum }}"
+
+    - name: Log MD5 checksum status
+      debug:
+        msg: >
+          {% if md5_checksum != file_checksum %}
+            MD5 checksum for {{ upgrade_filename }} does not match! File might be corrupted.
+          {% else %}
+            MD5 checksum for {{ upgrade_filename }} matches. File is valid.
+          {% endif %}
+
+    # Stop all remaining tasks for this host
+    - name: Fail the task and stop further tasks for this host
+      fail:
+        msg: "Stopping further tasks on host {{ inventory_hostname }} due to firmware is corrupted."
+      when: md5_checksum != file_checksum
+
+# Check if the new image file already exists on the router
+# Task 6: Create EEM scripts to upload file
+    - name: Run "show run | inc event.*UPGRADE" to check if the device has already been configured with a upgrade EEM script
+      cisco.ios.ios_command:
+        commands:
+          - "show run | inc event.*UPGRADE"
+      register: upload_output
+
+    - name: Determine the if a UPGRADE script exists
+      set_fact:
+        eem_exist: >
+          {% if 'UPGRADE' in upload_output.stdout[0] %}
+            true
+          {% else %}
+            false
+          {% endif %}
+
+# Task 7: Configure the EEM scripts
+    - name: Ensure command_timeout is an integer
+      set_fact:
+        command_timeout: "{{ command_timeout | int }}"
+
+    - name: Configure the EEM script by first removing the existing one 
+      cisco.ios.ios_config:
+        lines:
+          - no event manager applet UPGRADE
+      when: eem_exist 
+
+    # Note that the prompt will change if the running configuration is not saved.  Therefore the EEM script mandates to save the configuration before activating the new firmware.
+    - name: Configure the actual EEM script 
+      cisco.ios.ios_config:
+        lines:
+          - event manager applet UPGRADE authorization bypass
+          - event none maxrun {{ command_timeout }}
+          - action 0001 cli command "enable"
+          - action 0002 cli command "term length 0"
+          - action 0005 cli command "wr" 
+          - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "This operation requires a reload"
+          - action 0020 cli command "y" 
+
+    - name: Run the EEM script to perform upgrade
+      cisco.ios.ios_command:
+        commands: "event manager run UPGRADE"
+      vars:
+        ansible_command_timeout: "{{ command_timeout }}"

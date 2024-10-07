@@ -1,6 +1,14 @@
 ---
 # Ansible Playbook to uploade images to Cisco devices 
 # Check available space and quit if failed
+#
+# Defined variables in template survey
+#
+# upgrade_filename - Firmware filename to be uploaded
+# file_size_kb - File size in kilo Bytes
+# tftp_server_ip - TFTP server IP address
+# path - Path in TFTP server storing firmware file
+# command_timeout - Timeout for ansible command execution. Configure to allow long upload time (in seconds)
 # 
 - name: Upload images to Cisco devices 
   hosts: all

@@ -46,12 +46,25 @@ Failing to configure Smart Licensing before upgrading may result in licensing is
 ├── README.md
 ├── ansible.cfg
 ├── ansible_hosts
+├── awx
+│   ├── Dockerfile
+│   ├── activate.yaml
+│   ├── cleanup-flash.yaml
+│   ├── configure-reboot-eem.yaml
+│   ├── reboot.yaml
+│   ├── show-version.yaml
+│   └── upload-image-tftp.yaml
+├── file_structure.txt
 ├── group_vars
 │   ├── catalyst_vars.yaml
 │   ├── generic_ios_vars.yaml
 │   └── ios_xe_router_vars.yaml
 ├── log
+│   ├── health-check-2024-09-20_15-06-52.log
+│   ├── health-check-2024-09-22_19-35-26.log
+│   └── health-check-2024-09-30_09-42-28.log
 ├── reboot.yaml
+├── requirements.yml
 └── show-version.yaml
 ```
 
@@ -71,6 +84,9 @@ Playbooks breaks down into 4 phases with 4 individual playbooks:
 6. **activate-image.yaml**      - Perform the upgrade using the install command.
 
 The playbooks should be executed in this sequence.
+
+A directory ```awx``` stores relevant playbooks to be used in AWX/Ansible Tower environment.
+AWX/Ansible Tower does not support interactive prompt to interface with network devices, therefore EEM scripts are developed to automate the prompt handling in AWX/Ansible Tower environment.
 
 
 ## Preparing the playbooks for execution
