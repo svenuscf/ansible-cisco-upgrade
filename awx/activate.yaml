@@ -26,16 +26,20 @@
       debug:
         msg: "Target version is {{ target_version }}"
 
+    # Task 2: Check if the device requires upgrade by matching running version and upgrade version supplied by survey
     - name: Stop following tasks if the device does not need to upgrade
       fail:
         msg: "Device is already running the latest {{ target_version }} version. Upgrade procedure stops."
       when:
         - facts.ansible_facts.ansible_net_version == target_version
 
-    - name: Assign device_storage variable
+    # Assgin device_type variable. Later used for defining upgrade methods.
+    - name: Assign device_type variable
       set_fact:
         device_type: "{{ ('router' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'switch') | trim }}"
       
+    # The playbook supports IOS-XE upgrade in INSTALL mode or legacy device using boot system command
+    # Check which mode is in use.
     - name: Run "show version" to check if the device is in INSTALL mode
       cisco.ios.ios_command:
         commands:
@@ -73,46 +77,26 @@
         device_file: "{{ device_storage }}{{ upgrade_filename }}"
 
     - block:
-        # Task 1: Check if the file exists
+        # Task 3: Check if the file exists
         - name: Check if the file exists on the device
           cisco.ios.ios_command:
             commands: "dir {{ device_file }}"
           register: file_check
           ignore_errors: no  # Don't ignore errors here; use rescue to catch errors.
 
-        # Task 2: Parse the file check result
+        # Task 4: Parse the file check result
         - name: Parse the file check result
           set_fact:
             file_exists: "{{ 'stdout' in file_check and 'No such file' not in file_check.stdout[0] }}"
 
       rescue:
-        # Error handling: when `dir` command fails (e.g., command not found)
+        # Error handling: when file does not exist
         - name: Print error message
           debug:
             msg: "Error: File does not exist on host {{ inventory_hostname }}. Stopping upgrade procedure."
 
         # Stop all remaining tasks for this host
-        - name: Fail the task and stop further tasks for this host
+        - name: Fail the task and stop further tasks for this host if upgrade firmware does not exist
           fail:
             msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
-
-    # Print inventory hostname
-    - name: Print inventory hostname
-      debug:
-        msg: "Inventory Hostname: {{ inventory_hostname }}"
-
-    # Print ansible_host variable (usually set in inventory)
-    - name: Print ansible_host (IP or hostname of the target)
-      debug:
-        msg: "Ansible Host: {{ ansible_host }}"
-
-    # Print another group or inventory variable (example: device_storage)
-    - name: Print group variable 'device_storage'
-      debug:
-        msg: "Group Variable - device_storage: {{ device_storage }}"
-
-    # Print all variables available for the host
-    - name: Print all host variables
-      debug:
-        var: hostvars[inventory_hostname]
 
