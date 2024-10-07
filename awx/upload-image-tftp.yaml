@@ -1,5 +1,5 @@
 ---
-# Ansible Playbook to uploade images to Cisco devices 
+# Ansible Playbook to upload images to Cisco devices 
 # Check available space and quit if failed
 #
 # Defined variables in template survey
@@ -56,7 +56,7 @@
           - "show run | inc event.*UPLOAD"
       register: upload_output
 
-    - name: Determine the if a UPLOAD script exists
+    - name: Determine if an UPLOAD script exists
       set_fact:
         eem_exist: >
           {% if 'UPLOAD' in upload_output.stdout[0] %}
