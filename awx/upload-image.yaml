@@ -110,4 +110,4 @@
       cisco.ios.ios_config:
         lines: 
           - "no event manager applet UPLOAD"
-      save_when: always
+        save_when: always
