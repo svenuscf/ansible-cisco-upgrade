@@ -80,7 +80,7 @@
           - event none maxrun {{ command_timeout }}
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
-          - action 0010 cli command "copy tftp://{{ server_ip }}{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
+          - action 0010 cli command "copy tftp://{{ server_ip }}{{ path }}/{{ upgrade_filename }} {{ device_storage }} vrf {{ vrf }}" pattern "Destination"
           - action 0020 cli command "{{ upgrade_filename }}" 
       when: transfer_mode == "TFTP"
 
@@ -91,7 +91,7 @@
           - event none maxrun {{ command_timeout }}
           - action 0001 cli command "enable"
           - action 0002 cli command "term length 0"
-          - action 0010 cli command "copy scp://{{ scp_username }}@{{ server_ip }}/{{ path }}/{{ upgrade_filename }} {{ device_storage }}" pattern "Destination"
+          - action 0010 cli command "copy scp://{{ scp_username }}@{{ server_ip }}/{{ path }}/{{ upgrade_filename }} {{ device_storage }} vrf {{ vrf }}" pattern "Destination"
           - action 0020 cli command "{{ upgrade_filename }}" pattern "Password"
           - action 0030 cli command "{{ scp_password }}"
       when: transfer_mode == "SCP"
