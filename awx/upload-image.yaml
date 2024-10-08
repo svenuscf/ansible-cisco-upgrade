@@ -75,12 +75,7 @@
 
     - name: Prepend "vrf " in front of the VRF variable if being set in the template
       set_fact:
-        new_vrf: |
-          {% if vrf_name != "" %}
-            vrf {{ vrf_name }}
-          {% else %}
-            ""
-          {% endif %}
+        new_vrf: "{{ 'vrf ' ~ vrf_name if vrf_name | length > 0 else '' }}"
 
     - name: Configure the actual EEM script for TFTP
       cisco.ios.ios_config:
