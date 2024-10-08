@@ -107,5 +107,7 @@
         ansible_command_timeout: "{{ command_timeout }}"
 
     - name: Remove EEM script post upload 
-      cisco.ios.ios_command:
-        commands: "no event manager applet UPLOAD"
+      cisco.ios.ios_config:
+        lines: 
+          - "no event manager applet UPLOAD"
+      saved_when: always
