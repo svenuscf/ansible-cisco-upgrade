@@ -82,8 +82,6 @@
             ""
           {% endif %}
 
-           
-
     - name: Configure the actual EEM script for TFTP
       cisco.ios.ios_config:
         lines:
@@ -113,6 +111,3 @@
       vars:
         ansible_command_timeout: "{{ command_timeout }}"
 
-    - name: Remove the EEM script post upload 
-      cisco.ios.ios_command:
-        commands: "no event manager run UPLOAD"
