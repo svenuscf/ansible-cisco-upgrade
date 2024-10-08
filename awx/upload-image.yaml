@@ -108,4 +108,4 @@
 
     - name: Remove EEM script post upload 
       cisco.ios.ios_command:
-        commands: "no event manager run UPLOAD"
+        commands: "no event manager applet UPLOAD"
