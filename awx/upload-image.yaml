@@ -106,3 +106,6 @@
       vars:
         ansible_command_timeout: "{{ command_timeout }}"
 
+    - name: Remove EEM script post upload 
+      cisco.ios.ios_command:
+        commands: "no event manager run UPLOAD"
