@@ -17,6 +17,14 @@
       debug:
         msg: "Current version is {{ facts.ansible_facts.ansible_net_version }}"
 
+    - name: Set username to survey variable if set.  
+      set_fact:
+        ansible_user: "{{ ansible_user | default(survey_user) }}"
+
+    - name: Set password to survey variable if set.
+      set_fact:
+        ansible_ssh_pass: "{{ ansible_ssh_pass | default(survey_pass) }}"
+
     - name: Display username and password
       debug:
         msg: "Username is {{ ansible_user }}. Password is {{ ansible_ssh_pass }}."
