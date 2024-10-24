@@ -103,12 +103,18 @@
             msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
 
 # Task 5: Check md5 checksum on the device against the input from template survey
+    - name: Ensure command_timeout is an integer
+      set_fact:
+        command_timeout: "{{ command_timeout | int }}"
+
     - name: Verify MD5 checksum of the uploaded file
       cli_command:
         command: "verify /md5 {{ device_file }}"
       register: checksum_output
       ignore_errors: yes
       changed_when: false
+      vars:
+        ansible_command_timeout: "{{ command_timeout }}"
 
     - name: Flatten the stdout lines to handle multi-line output
       set_fact:
@@ -155,10 +161,6 @@
           {% endif %}
 
 # Task 7: Configure the EEM scripts
-    - name: Ensure command_timeout is an integer
-      set_fact:
-        command_timeout: "{{ command_timeout | int }}"
-
     - name: Configure the EEM script by first removing the existing one 
       cisco.ios.ios_config:
         lines:
