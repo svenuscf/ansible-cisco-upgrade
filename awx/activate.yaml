@@ -205,4 +205,44 @@
               - "boot system {{ device_file }}"
             save_when: always
           register: config_output
+
+    # Task 7b: Check whether the device has the same EEM script defined
+        - name: Run "show run | inc event.*REBOOT" to check if the device has already been configured with a reboot EEM script
+          cisco.ios.ios_command:
+            commands:
+              - "show run | inc event.*REBOOT"
+          register: reboot_output
+
+        - name: Determine the if a REBOOT script exists
+          set_fact:
+            eem_exist: >
+              {% if 'REBOOT' in reboot_output.stdout[0] %}
+                true
+              {% else %}
+                false
+              {% endif %}
+
+    # Task 8: Configure the EEM scripts
+        - name: Configure the EEM script by first removing the existing one 
+          cisco.ios.ios_config:
+            lines:
+              - no event manager applet REBOOT
+          when: eem_exist 
+
+        - name: Configure the actual EEM script 
+          cisco.ios.ios_config:
+            lines:
+              - event manager applet REBOOT authorization bypass
+              - event none
+              - action 0001 cli command "enable"
+              - action 0002 cli command "term length 0"
+              - action 0010 cli command "reload" pattern "confirm"
+              - action 0020 cli command "y" 
+            save_when: always
+
+    # Task 9: Execute the reboot EEM script
+        - name: Issue reload EEM script
+          cisco.ios.ios_command:
+            commands: "event manager run REBOOT"
+
       when: not in_install_mode
