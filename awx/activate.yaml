@@ -188,7 +188,7 @@
             commands: "event manager run UPGRADE"
           vars:
             ansible_command_timeout: "{{ command_timeout }}"
-    when: in_install_mode
+      when: in_install_mode
 
     # Task 6b: Change Boot variable for legacy devices using bundle mode
     - block:
@@ -205,3 +205,4 @@
               - "boot system {{ device_file }}"
           register: config_output
           save_when: always
+      when: not in_install_mode
