@@ -203,6 +203,6 @@
             lines:
               - "no {{ boot_output.stdout[0] }}"
               - "boot system {{ device_file }}"
+            save_when: always
           register: config_output
-          save_when: always
       when: not in_install_mode
