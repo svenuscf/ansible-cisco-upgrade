@@ -1,5 +1,5 @@
 ---
-# Playbook to print inventory and group variables
+# Playbook to activate image for patching IOS via AWX
 #
 # Defined variables in survey:
 #
@@ -8,7 +8,7 @@
 # md5_checksum - MD5 checksum of the image file
 # command_timeout - Set ansible command timeout
 #
-- name: Print inventory and group variables in AWX
+- name: Patch Cisco IOS and IOS-XE in AWX
   hosts: all
   gather_facts: false
   tasks:
@@ -54,14 +54,14 @@
         in_install_mode: "{{ 'INSTALL' in version_output.stdout[0] }}"
       when: device_type == 'switch'
 
-    - name: Run "show run | inc boot" to check if the device is in INSTALL mode
+    - name: Run "show run | inc boot system" to check if the device is in INSTALL mode
       cisco.ios.ios_command:
         commands:
-          - show version
+          - show run | inc boot system
       register: version_output
       when: device_type == 'router'
 
-    - name: Parse "show run | inc boot" output for INSTALL mode
+    - name: Parse "show run | inc boot system" output for INSTALL mode
       set_fact:
         in_install_mode: "{{ 'packages.conf' in version_output.stdout[0] }}"
       when: device_type == 'router'
@@ -192,10 +192,16 @@
 
     # Task 6b: Change Boot variable for legacy devices using bundle mode
     - block:
+        - name: Capture boot system command to be modified
+          cisco.ios.ios_command:
+            commands:
+              - show run | inc boot system
+          register: boot_output
+
         - name: Configure boot variable to prepare for reboot 
           cisco.ios.ios_config:
             lines:
-              - "no {{ version_output.stdout[0] }}"
+              - "no {{ boot_output.stdout[0] }}"
               - "boot system {{ device_file }}"
           register: config_output
           save_when: always
