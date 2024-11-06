@@ -102,7 +102,7 @@
           fail:
             msg: "Stopping further tasks on host {{ inventory_hostname }} due to upgrade file not exist."
 
-# Task 5: Check md5 checksum on the device against the input from template survey
+    # Task 5: Check md5 checksum on the device against the input from template survey
     - name: Ensure command_timeout is an integer
       set_fact:
         command_timeout: "{{ command_timeout | int }}"
@@ -143,44 +143,59 @@
         msg: "Stopping further tasks on host {{ inventory_hostname }} due to firmware is corrupted."
       when: md5_checksum != file_checksum
 
-# Check if the new image file already exists on the router
-# Task 6: Create EEM scripts to upload file
-    - name: Run "show run | inc event.*UPGRADE" to check if the device has already been configured with a upgrade EEM script
-      cisco.ios.ios_command:
-        commands:
-          - "show run | inc event.*UPGRADE"
-      register: upload_output
+    # Activate image based on in_install_mode variable:
+    # If true, use install command.
+    # If false, config boot variable and reboot
+    
+    # Task 6a: Create EEM scripts to upgrade using the install command
+    - block:
+        - name: Run "show run | inc event.*UPGRADE" to check if the device has already been configured with a upgrade EEM script
+          cisco.ios.ios_command:
+            commands:
+              - "show run | inc event.*UPGRADE"
+          register: upgrade_output
 
-    - name: Determine the if a UPGRADE script exists
-      set_fact:
-        eem_exist: >
-          {% if 'UPGRADE' in upload_output.stdout[0] %}
-            true
-          {% else %}
-            false
-          {% endif %}
+        - name: Determine the if a UPGRADE script exists
+          set_fact:
+            eem_exist: >
+              {% if 'UPGRADE' in upgrade_output.stdout[0] %}
+                true
+              {% else %}
+                false
+              {% endif %}
 
-# Task 7: Configure the EEM scripts
-    - name: Configure the EEM script by first removing the existing one 
-      cisco.ios.ios_config:
-        lines:
-          - no event manager applet UPGRADE
-      when: eem_exist 
+    # Task 7a: Configure the EEM scripts
+        - name: Configure the EEM script by first removing the existing one 
+          cisco.ios.ios_config:
+            lines:
+              - no event manager applet UPGRADE
+          when: eem_exist 
 
     # Note that the prompt will change if the running configuration is not saved.  Therefore the EEM script mandates to save the configuration before activating the new firmware.
-    - name: Configure the actual EEM script 
-      cisco.ios.ios_config:
-        lines:
-          - event manager applet UPGRADE authorization bypass
-          - event none maxrun {{ command_timeout }}
-          - action 0001 cli command "enable"
-          - action 0002 cli command "term length 0"
-          - action 0005 cli command "wr" 
-          - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "This operation" 
-          - action 0020 cli command "y" 
+        - name: Configure the actual EEM script 
+          cisco.ios.ios_config:
+            lines:
+              - event manager applet UPGRADE authorization bypass
+              - event none maxrun {{ command_timeout }}
+              - action 0001 cli command "enable"
+              - action 0002 cli command "term length 0"
+              - action 0005 cli command "wr" 
+              - action 0010 cli command "install add file {{ device_file }} activate commit" pattern "This operation" 
+              - action 0020 cli command "y" 
 
-    - name: Run the EEM script to perform upgrade
-      cisco.ios.ios_command:
-        commands: "event manager run UPGRADE"
-      vars:
-        ansible_command_timeout: "{{ command_timeout }}"
+        - name: Run the EEM script to perform upgrade
+          cisco.ios.ios_command:
+            commands: "event manager run UPGRADE"
+          vars:
+            ansible_command_timeout: "{{ command_timeout }}"
+    when: in_install_mode
+
+    # Task 6b: Change Boot variable for legacy devices using bundle mode
+    - block:
+        - name: Configure boot variable to prepare for reboot 
+          cisco.ios.ios_config:
+            lines:
+              - "no {{ version_output.stdout[0] }}"
+              - "boot system {{ device_file }}"
+          register: config_output
+          save_when: always
