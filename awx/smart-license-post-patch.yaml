@@ -1,0 +1,66 @@
+---
+# Playbook to apply smart licensing configus to Cisco devices post upgrade via AWX
+#
+# Defined variables in survey:
+# Not required
+#
+- name: Apply smart licensing configs to GovNext Cisco IOS-XE devices
+  hosts: all
+  gather_facts: false
+  tasks:
+
+    # Task 1: Gather necessary facts
+    - name: Gather facts from Cisco devices
+      cisco.ios.ios_facts:
+        gather_subset:
+          - hardware
+      register: facts
+
+    - name: Display running version
+      debug:
+        msg: "Current version is {{ facts.ansible_facts.ansible_net_version }}"
+
+    # Task 2: Check if the device requires the additional commands 
+    - name: Stop playbook if the device is not running 17.3.3 or higher
+      fail:
+        msg: "Device is not running IOS-XE 17.3.3 or above. Exiting template."
+      when:
+        - facts.ansible_facts.ansible_net_version is version('17.3.2', '<') 
+
+    # Assgin device_type variable. Later used for defining upgrade methods.
+    - name: Assign device_type variable
+      set_fact:
+        device_type: "{{ ('router' if 'bootflash:' in facts.ansible_facts.ansible_net_image else 'switch') | trim }}"
+      
+    # Task 3a: Apply Smart Licensing command
+    - block:
+        - name: Configure Smart licensing commands to routers 
+          cisco.ios.ios_config:
+            lines:
+              - "ip http client source-interface Loopback34"
+              - "license smart transport cslu"
+              - "license smart url cslu http://202.137.201.35/cslu/v1/pi/DATACOM-NME-SSM02-1"
+            save_when: always
+
+    # Task 3a: Execute license sync
+        - name: Execute license smart sync command
+          cisco.ios.ios_command:
+            commands:
+              - "license smart sync local"
+      when: device_type == 'router'
+
+    # Task 3b: Apply Smart Licensing command
+    - block:
+        - name: Configure Smart licensing commands to switches 
+          cisco.ios.ios_config:
+            lines:
+              - "license smart transport cslu"
+              - "license smart url cslu http://202.137.201.35/cslu/v1/pi/DATACOM-NME-SSM02-1"
+            save_when: always
+
+    # Task 3b: Execute license sync
+        - name: Execute license smart sync command
+          cisco.ios.ios_command:
+            commands:
+              - "license smart sync local"
+      when: device_type == 'switch'
