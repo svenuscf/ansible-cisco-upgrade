@@ -20,7 +20,7 @@
     - name: Send email
       community.general.mail:
         host: smtp.mail.me.com
-        port: 587
+        port: 465
         username: "{{ mail_user }}"
         password: "{{ mail_password }}"
         to: "ajidom@gmail.com"
