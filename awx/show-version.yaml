@@ -19,7 +19,7 @@
 
     - name: Send email
       community.general.mail:
-        host: mail.aussiebroadband.com.au
+        host: smtp.gmail.com
         port: 25
         to: "garywong@datacom.com, ajidom@gmail.com"
         from: "ajidom@gmail.com"
