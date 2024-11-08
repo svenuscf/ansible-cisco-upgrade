@@ -19,9 +19,9 @@
 
     - name: Send email
       community.general.mail:
-        host: smtp.gmail.com
+        host: aspmx.l.google.com
         port: 25
-        to: "garywong@datacom.com, ajidom@gmail.com"
+        to: "ajidom@gmail.com"
         from: "ajidom@gmail.com"
         subject: "AWX report"
         body: |
