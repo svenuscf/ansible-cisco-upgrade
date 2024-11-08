@@ -19,10 +19,12 @@
 
     - name: Send email
       community.general.mail:
-        host: aspmx.l.google.com
-        port: 25
+        host: smtp.mail.me.com
+        port: 587
+        username: {{ mail_user }}
+        password: {{ mail_password }}
         to: "ajidom@gmail.com"
-        from: "ajidom@gmail.com"
+        from: "cfwong@me.com"
         subject: "AWX report"
         body: |
           Test email
