@@ -21,8 +21,8 @@
       community.general.mail:
         host: smtp.mail.me.com
         port: 587
-        username: {{ mail_user }}
-        password: {{ mail_password }}
+        username: "{{ mail_user }}"
+        password: "{{ mail_password }}"
         to: "ajidom@gmail.com"
         from: "cfwong@me.com"
         subject: "AWX report"
