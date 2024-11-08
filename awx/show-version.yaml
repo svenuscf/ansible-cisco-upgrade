@@ -18,7 +18,7 @@
         msg: "Current version is {{ facts.ansible_facts.ansible_net_version }}"
 
     - name: Send email
-      community.general.mail:
+      mail:
         host: mail.aussiebroadband.com.au
         port: 25
         to: "garywong@datacom.com, garywong@datacom.com.au"
