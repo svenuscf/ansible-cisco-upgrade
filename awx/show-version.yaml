@@ -17,3 +17,14 @@
       debug:
         msg: "Current version is {{ facts.ansible_facts.ansible_net_version }}"
 
+    - name: Send email
+      community.general.mail:
+        host: mail.aussiebroadband.com
+        port: 25
+        to: "garywong@datacom.com, ajidom@gmail.com"
+        from: "ajidom@gmail.com"
+        subject: "AWX report"
+        body: |
+          Test email
+      delegate_to: localhost
+      run_once: true
