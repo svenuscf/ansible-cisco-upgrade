@@ -27,6 +27,10 @@
   hosts: localhost
   gather_facts: false
   tasks:
+    - name: Filter recipients to allowed domains only
+      set_fact:
+        filtered_recipients: "{{ recipients | select('match', '(^.*@datacom\\.com$|^.*@gmail\\.com$)') | list }}"
+
     - name: Assert required variables are defined before sending email report
       assert:
         that:
@@ -35,7 +39,8 @@
           - smtp_user is defined
           - smtp_pass is defined
           - recipients is defined
-        msg: "One or more required variables are missing. Email report will not be sent."
+          - filtered_recipients | length > 0  # Ensure there are allowed recipients
+        msg: "One or more required variables are missing, or no allowed recipients. Email report will not be sent."
 
     - name: Send email
       community.general.mail:
@@ -43,7 +48,7 @@
         port: "{{ smtp_port }}" 
         username: "{{ smtp_user }}"
         password: "{{ smtp_pass }}"
-        to: "{{ recipients }}"
+        to: "{{ filtered_recipients }}"
         from: "gary.wong@garywong.pro"
         subject: "AWX report - Software version"
         body: |
