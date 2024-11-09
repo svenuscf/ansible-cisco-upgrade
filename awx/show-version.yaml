@@ -23,6 +23,14 @@
         all_results: "{{ all_results | default([]) + [{ 'host': inventory_hostname, 'version': facts.ansible_facts.ansible_net_version }] }}"
       delegate_to: localhost  # Collect results centrally at localhost
 
+- name: Aggregate results for email
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Combine results from all hosts
+      set_fact:
+        combined_results: "{{ combined_results | default([]) + all_results }}"
+
 - name: Send email report
   hosts: localhost
   gather_facts: false
@@ -49,7 +57,7 @@
         body: |
           Software version report
 
-          {% for result in all_results %}
+          {% for result in combined_results %}
           Host: {{ result.host }} | Version: {{ result.version }}
           {% endfor %}
         secure: starttls
