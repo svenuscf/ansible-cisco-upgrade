@@ -24,7 +24,7 @@
 
     - name: Filter recipients to allowed domain only
       set_fact:
-        filtered_recipients: "{{ receipients | select('match', '^.*@(' + 'datacom.com,gmail.com' | join('|') + '$') | list }}"
+        filtered_recipients: "{{ receipients | select('match', '^.*@(' + 'datacom.com,gmail.com' | join('|') + ')$') | list }}"
 
     - block:
       - name: Assert required variables are defined before sending email report
