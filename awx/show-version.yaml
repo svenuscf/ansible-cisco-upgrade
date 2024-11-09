@@ -24,7 +24,7 @@
 
     - name: Filter recipients to allowed domain only
       set_fact:
-        filtered_recipients: "{{ receipients | select('match', '^.*@(' + 'datacom.com,gmail.com' | join('|') + ')$') | list }}"
+        filtered_recipients: "{{ recipients | select('match', '^.*@(' + 'datacom.com,gmail.com' | join('|') + ')$') | list }}"
 
     - block:
       - name: Assert required variables are defined before sending email report
@@ -34,7 +34,7 @@
             - smtp_port is defined
             - smtp_user is defined
             - smtp_pass is defined
-            - receipients is defined
+            - recipients is defined
           msg: "One or more required variables are missing. Email report will not be sent."
 
       - name: Send email
