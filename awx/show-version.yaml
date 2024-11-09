@@ -19,8 +19,8 @@
 
     - name: Send email
       community.general.mail:
-        host: smtp.mail.me.com
-        port: 465
+        host: "{{ smtp_host }}"
+        port: "{{ smtp_port }}" 
         username: "{{ mail_user }}"
         password: "{{ mail_password }}"
         to: "ajidom@gmail.com"
