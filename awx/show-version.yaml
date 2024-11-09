@@ -21,10 +21,10 @@
       community.general.mail:
         host: "{{ smtp_host }}"
         port: "{{ smtp_port }}" 
-        username: "{{ mail_user }}"
-        password: "{{ mail_password }}"
+        username: "{{ smtp_user }}"
+        password: "{{ smtp_pass }}"
         to: "ajidom@gmail.com"
-        from: "cfwong@me.com"
+        from: "gary.wong@garywong.pro"
         subject: "AWX report"
         body: |
           Test email
