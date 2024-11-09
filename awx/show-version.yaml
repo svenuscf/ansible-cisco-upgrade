@@ -26,7 +26,11 @@
       set_fact:
         filtered_recipients: "{{ recipients | select('match', '^.*@(' + 'datacom.com,gmail.com' | join('|') + ')$') | list }}"
 
-    - block:
+  - name: Send email report
+    hosts: localhost
+    gather_facts: false
+    tasks:
+
       - name: Assert required variables are defined before sending email report
         assert:
           that:
@@ -49,8 +53,8 @@
           body: |
             Software version report
 
-            {% for result in all_results %}
-            {{ result.version }}
+            {% for result in hostvars.values() %}
+            Host: {{ result.inventory_hostname }} | Version: {{ result.version_result.msg }}
 
             {% endfor %}
           secure: starttls
