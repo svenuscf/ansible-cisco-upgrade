@@ -29,7 +29,7 @@
   tasks:
     - name: Filter recipients to allowed domains only
       set_fact:
-        filtered_recipients: "{{ recipients | select('match', '(^.*@datacom\\.com$|^.*@gmail\\.com$)') | list }}"
+        filtered_recipients: "{{ recipients.split(',') | map('trim') | select('match', '(^.*@datacom\\.com$|^.*@gmail\\.com$)') | list }}"
 
     - name: Assert required variables are defined before sending email report
       assert:
