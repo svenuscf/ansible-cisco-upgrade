@@ -20,7 +20,7 @@
 
     - name: Collect results from each device
       set_fact:
-        all_results: "{{ all_results | default([]) + [{ 'host': inventory_hostname, 'version': version_result.msg }] }}"
+        all_results: "{{ all_results | default([]) + [{ 'host': inventory_hostname, 'version': facts.ansible_facts.ansible_net_version }] }}"
       delegate_to: localhost  # Collect results centrally at localhost
 
 - name: Send email report
@@ -49,8 +49,8 @@
         body: |
           Software version report
 
-          {% for host in hostvars %}
-          Host: {{ hostvars[host].inventory_hostname }} | Version: {{ hostvars[host].version_result.msg }}
+          {% for result in all_results %}
+          Host: {{ result.host }} | Version: {{ result.version }}
           {% endfor %}
         secure: starttls
       delegate_to: localhost
