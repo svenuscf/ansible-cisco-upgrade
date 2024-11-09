@@ -50,7 +50,7 @@
           Software version report
 
           {% for host in hostvars %}
-          {{ hostvars[host].facts.ansible_facts.ansible_net_version }}
+          Host: {{ hostvars[host].inventory_hostname }} | Version: {{ hostvars[host].facts.ansible_facts.ansible_net_version }}
           {% endfor %}
         secure: starttls
       delegate_to: localhost
