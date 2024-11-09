@@ -20,8 +20,7 @@
 
     - name: Collect results from each device
       set_fact:
-        all_results: "{{ all_results | default([]) + [{ 'host': inventory_hostname, 'version': facts.ansible_facts.ansible_net_version }] }}"
-      delegate_to: localhost  # Collect results centrally at localhost
+        device_result: "{{ {'host': inventory_hostname, 'version': facts.ansible_facts.ansible_net_version} }}"
 
 - name: Aggregate results for email
   hosts: localhost
@@ -29,7 +28,7 @@
   tasks:
     - name: Combine results from all hosts
       set_fact:
-        combined_results: "{{ combined_results | default([]) + all_results }}"
+        combined_results: "{{ hostvars | map(attribute='device_result') | list }}"
 
 - name: Send email report
   hosts: localhost
