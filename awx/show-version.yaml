@@ -15,7 +15,7 @@
 
     - name: Display running version
       debug:
-        msg: "{{ inventory_hostname}} is running version {{ facts.ansible_facts.ansible_net_version }}."
+        msg: "Host: {{ inventory_hostname}} Version {{ facts.ansible_facts.ansible_net_version }}."
       register: version_result
 
     - name: Collect results from each device
@@ -50,8 +50,7 @@
             Software version report
 
             {% for result in all_results %}
-            Host: {{ result.host }}
-            Version: {{ result.version }}
+            {{ result.version }}
 
             {% endfor %}
           secure: starttls
