@@ -15,48 +15,43 @@
 
     - name: Display running version
       debug:
-        msg: "Host: {{ inventory_hostname}} | Version {{ facts.ansible_facts.ansible_net_version }}."
+        msg: "Host: {{ inventory_hostname }} | Version {{ facts.ansible_facts.ansible_net_version }}."
       register: version_result
 
     - name: Collect results from each device
       set_fact:
         all_results: "{{ all_results | default([]) + [{ 'host': inventory_hostname, 'version': version_result.msg }] }}"
+      delegate_to: localhost  # Collect results centrally at localhost
 
-    - name: Filter recipients to allowed domain only
-      set_fact:
-        filtered_recipients: "{{ recipients | select('match', '^.*@(' + 'datacom.com,gmail.com' | join('|') + ')$') | list }}"
+- name: Send email report
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Assert required variables are defined before sending email report
+      assert:
+        that:
+          - smtp_host is defined
+          - smtp_port is defined
+          - smtp_user is defined
+          - smtp_pass is defined
+          - recipients is defined
+        msg: "One or more required variables are missing. Email report will not be sent."
 
-  - name: Send email report
-    hosts: localhost
-    gather_facts: false
-    tasks:
+    - name: Send email
+      community.general.mail:
+        host: "{{ smtp_host }}"
+        port: "{{ smtp_port }}" 
+        username: "{{ smtp_user }}"
+        password: "{{ smtp_pass }}"
+        to: "{{ recipients }}"
+        from: "gary.wong@garywong.pro"
+        subject: "AWX report - Software version"
+        body: |
+          Software version report
 
-      - name: Assert required variables are defined before sending email report
-        assert:
-          that:
-            - smtp_host is defined
-            - smtp_port is defined
-            - smtp_user is defined
-            - smtp_pass is defined
-            - recipients is defined
-          msg: "One or more required variables are missing. Email report will not be sent."
-
-      - name: Send email
-        community.general.mail:
-          host: "{{ smtp_host }}"
-          port: "{{ smtp_port }}" 
-          username: "{{ smtp_user }}"
-          password: "{{ smtp_pass }}"
-          to: "{{ recipients }}"
-          from: "gary.wong@garywong.pro"
-          subject: "AWX report - Software version"
-          body: |
-            Software version report
-
-            {% for result in hostvars.values() %}
-            Host: {{ result.inventory_hostname }} | Version: {{ result.version_result.msg }}
-
-            {% endfor %}
-          secure: starttls
-        delegate_to: localhost
+          {% for host in hostvars %}
+          Host: {{ hostvars[host].inventory_hostname }} | Version: {{ hostvars[host].version_result.msg }}
+          {% endfor %}
+        secure: starttls
+      delegate_to: localhost
       run_once: true
