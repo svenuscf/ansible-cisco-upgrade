@@ -15,7 +15,7 @@
 
     - name: Display running version
       debug:
-        msg: "Host: {{ inventory_hostname}} Version {{ facts.ansible_facts.ansible_net_version }}."
+        msg: "Host: {{ inventory_hostname}} | Version {{ facts.ansible_facts.ansible_net_version }}."
       register: version_result
 
     - name: Collect results from each device
